@@ -73,7 +73,9 @@ constructor(private readonly userService : UsersService){}
   ) {}
  
   @Delete('/profile/avatar')
-  async deleteAvatar(){}
+  async deleteAvatar(@User() user: IAuthenticatedUser){
+      return this.userService.removeAvatar(user.user_id);
+  }
 
     @Get('/list')
   @UseGuards(RoleGuard)

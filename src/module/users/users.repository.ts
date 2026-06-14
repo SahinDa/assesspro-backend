@@ -110,4 +110,18 @@ export class UsersRepository {
     }
   }
 
+  async removeAvatar(userId:string){
+  try{
+      const result = await this.dataSource
+      .getRepository(User)
+      .update(
+        { user_id: userId}, 
+        { profile_pic: null }
+      );
+      return (result?.affected ?? 0) > 0;
+  }catch(err){
+    throw err;
+  }
+  }
+
 }

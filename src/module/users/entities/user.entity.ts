@@ -33,7 +33,7 @@ export class User {
     status: UserStatus;
 
     @Column({ length: 500, nullable: true })
-    profile_pic?: string;
+    profile_pic?: string | null;
 
     @Column({ type: "boolean", default: false })
     is_deleted: boolean;

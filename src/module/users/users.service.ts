@@ -141,4 +141,11 @@ export class UsersService{
       throw err;
     }
   }
+  async removeAvatar(userId : string){
+    try{
+        return await this.usersRepository.removeAvatar(userId);
+    }catch(err){
+      throw err;
+    }
+  }
 }
