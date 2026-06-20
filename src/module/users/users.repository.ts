@@ -9,6 +9,7 @@ import { User } from './entities/user.entity';
 import { Auth } from '../auth/entities/auth.entity';
 import { UserStatus } from 'src/config/enum';
 import { UserDTO } from './dto/user.dto';
+import { UserOrganization } from './entities/userorganization.entity';
 
 @Injectable()
 export class UsersRepository {
@@ -150,5 +151,14 @@ export class UsersRepository {
         'Failed to update user profile in database.',
       );
     }
+  }
+  async getMyOrganizations(userId: string): Promise<UserOrganization[]> {
+    return await this.dataSource
+      .getRepository(UserOrganization)
+      .createQueryBuilder('uo')
+      .innerJoinAndSelect('uo.organization', 'org')
+      .where('uo.user_id = :userId', { userId })
+      .andWhere('uo.is_deleted = false')
+      .getMany();
   }
 }

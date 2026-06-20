@@ -64,7 +64,9 @@ export class UsersController {
   }
 
   @Get('/me/organizations')
-  async getMyOrganizations() {}
+  async getMyOrganizations(@User() user: IAuthenticatedUser) {
+    return this.userService.getMyOrganizations(user.user_id);
+  }
 
   @Patch('/change-password')
   async updatePassword(
