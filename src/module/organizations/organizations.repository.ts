@@ -1,16 +1,20 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { Organization } from "./entities/organization.entity";
-import { UserOrganization } from "../users/entities/userorganization.entity";
-import { JoinRequestStatus, OrganizationRole, OrganizationStatus, UserRole } from "src/config/enum";
-import { User } from "../users/entities/user.entity";
-import { DataSource } from "typeorm";
-import { UpdateOrgStatusDto } from "./dto/Organization.dto";
-import { JoinRequest } from "./entities/join-request.entity";
-
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Organization } from './entities/organization.entity';
+import { UserOrganization } from '../users/entities/userorganization.entity';
+import {
+  JoinRequestStatus,
+  OrganizationRole,
+  OrganizationStatus,
+  UserRole,
+} from 'src/config/enum';
+import { User } from '../users/entities/user.entity';
+import { DataSource } from 'typeorm';
+import { UpdateOrgStatusDto } from './dto/Organization.dto';
+import { JoinRequest } from './entities/join-request.entity';
 
 @Injectable()
 export class OrganizationsRepository {
-  constructor(private readonly dataSource: DataSource) { }
+  constructor(private readonly dataSource: DataSource) {}
 
   async checkExisting(userId: string, orgName: string): Promise<boolean> {
     const name = orgName.trim();
@@ -22,13 +26,16 @@ export class OrganizationsRepository {
 
     return isTaken;
   }
-  async createOrganization(userId: string, orgName: string): Promise<Organization> {
+  async createOrganization(
+    userId: string,
+    orgName: string,
+  ): Promise<Organization> {
     return await this.dataSource.transaction(async (manager) => {
-
-      await manager.update(User,
+      await manager.update(
+        User,
         { user_id: userId },
-        { role: UserRole.ORGANIZATION }
-      )
+        { role: UserRole.ORGANIZATION },
+      );
       const newOrg = manager.create(Organization, {
         name: orgName,
         status: OrganizationStatus.ACTIVE,
@@ -41,7 +48,7 @@ export class OrganizationsRepository {
         org_id: savedOrg.id,
         role: OrganizationRole.ADMIN,
         joined_date: new Date(),
-        is_deleted: false
+        is_deleted: false,
       });
       await manager.save(userOrgLink);
 
@@ -49,38 +56,42 @@ export class OrganizationsRepository {
     });
   }
 
-  async updateOrganization(userId: string, newName: string): Promise<{ success: boolean; data?: Organization; error?: string }> {
+  async updateOrganization(
+    userId: string,
+    newName: string,
+  ): Promise<{ success: boolean; data?: Organization; error?: string }> {
     try {
       const result = await this.dataSource
         .getRepository(Organization)
         .createQueryBuilder('org')
         .update(Organization)
         .set({ name: newName.trim() })
-        .where(`id = (
+        .where(
+          `id = (
         SELECT userOrg.org_id 
         FROM user_organization userOrg 
         WHERE userOrg.user_id = :userId 
           AND userOrg.is_deleted = false
         LIMIT 1
-      )`, { userId })
+      )`,
+          { userId },
+        )
         .returning('*')
         .execute();
 
       if (result.affected === 0) {
         return {
           success: false,
-          error: 'No active organization found linked to your user profile.'
+          error: 'No active organization found linked to your user profile.',
         };
       }
 
       return {
         success: true,
-        data: result.raw[0] as Organization
+        data: result.raw[0] as Organization,
       };
-
     } catch (dbError: any) {
-
-      throw dbError.message || 'A database error occurred.'
+      throw dbError.message || 'A database error occurred.';
     }
   }
   async findOrganizationDetailsByUserId(userId: string) {
@@ -101,15 +112,20 @@ export class OrganizationsRepository {
 
       // Return just the embedded Organization details object out of the junction record
       return userOrgMapping.organization as Organization;
-
     } catch (dbError: any) {
       // Log the internal error safely for infrastructure tracking
-      console.error('Failed to resolve organization properties context:', dbError);
+      console.error(
+        'Failed to resolve organization properties context:',
+        dbError,
+      );
       return null;
     }
   }
 
-  async getAllOrganizations(status?: string, isdeleted?: boolean): Promise<Organization[]> {
+  async getAllOrganizations(
+    status?: string,
+    isdeleted?: boolean,
+  ): Promise<Organization[]> {
     try {
       // 1 Step One: Run the query and use .getMany() to return an array of mappings
       const filterDeleted = isdeleted !== undefined ? isdeleted : false;
@@ -129,29 +145,29 @@ export class OrganizationsRepository {
           'user.email AS email',
           'user.firstname AS firstname',
           'user.lastname AS lastname',
-          'user.profile_pic AS profile_pic'
+          'user.profile_pic AS profile_pic',
         ])
         .where('userOrg.is_deleted = :filterDeleted', { filterDeleted });
 
       //  Handle Comma-Separated Status Strings
       if (status !== undefined && status !== null && status.trim() !== '') {
-
         // Step A: Split "0,1" into an array of strings: ["0", "1"]
         const stringArray = status.split(',');
 
         // Step B: Convert each string to a Base-10 integer and filter out any invalid entries
         const parsedStatuses = stringArray
-          .map(str => parseInt(str.trim(), 10))
-          .filter(num => !isNaN(num) && num in OrganizationStatus);
+          .map((str) => parseInt(str.trim(), 10))
+          .filter((num) => !isNaN(num) && num in OrganizationStatus);
 
         // Step C: If we have valid numbers left, use SQL 'IN' operator
         if (parsedStatuses.length > 0) {
-          query.andWhere('org.status IN (:...parsedStatuses)', { parsedStatuses });
+          query.andWhere('org.status IN (:...parsedStatuses)', {
+            parsedStatuses,
+          });
         }
       }
 
       const organizations = await query.getRawMany();
-
 
       // 2️  Step Two: Guard against an empty database table
       if (!organizations || organizations.length === 0) {
@@ -159,9 +175,11 @@ export class OrganizationsRepository {
       }
 
       return organizations;
-
     } catch (dbError: any) {
-      console.error('Failed to resolve all administrative organization records:', dbError);
+      console.error(
+        'Failed to resolve all administrative organization records:',
+        dbError,
+      );
       return [];
     }
   }
@@ -183,14 +201,13 @@ export class OrganizationsRepository {
           'user.email AS email',
           'user.firstname AS firstname',
           'user.lastname AS lastname',
-          'user.profile_pic AS profile_pic'
+          'user.profile_pic AS profile_pic',
         ])
         .where('userorg.org_id = :id', { id })
         .andWhere('userorg.is_deleted = :isDeleted', { isDeleted: false })
         .getRawOne();
 
       return res;
-
     } catch (err) {
       console.error('Error fetching organization details:', err);
       throw err;
@@ -200,13 +217,13 @@ export class OrganizationsRepository {
     try {
       const result = await this.dataSource
         .getRepository(Organization)
-        .update(
-          { id: input.orgId },
-          { status: input.status }
-        );
+        .update({ id: input.orgId }, { status: input.status });
       return (result?.affected ?? 0) > 0;
     } catch (err) {
-      console.error('Database failure during organization status transition:', err);
+      console.error(
+        'Database failure during organization status transition:',
+        err,
+      );
       return false;
     }
   }
@@ -221,25 +238,29 @@ export class OrganizationsRepository {
         .select([
           'org.id AS id',
           'org.name AS name',
-          'user.profile_pic AS profile_pic'
+          'user.profile_pic AS profile_pic',
         ])
         .where('userOrg.is_deleted = false')
         .andWhere('org.status = :orgstatus', { orgstatus })
-        .andWhere(`NOT EXISTS (
+        .andWhere(
+          `NOT EXISTS (
         SELECT 1 
         FROM join_requests jr 
         WHERE jr.organization_id = org.id 
         AND jr.user_id = :userId 
-      )`, {
-          userId,
-        })
+      )`,
+          {
+            userId,
+          },
+        )
         .getRawMany();
 
-
       return organizations;
-
     } catch (err) {
-      console.error('CRITICAL: Database failure during new-join organization lookup:', err);
+      console.error(
+        'CRITICAL: Database failure during new-join organization lookup:',
+        err,
+      );
       throw err;
     }
   }
@@ -256,10 +277,10 @@ export class OrganizationsRepository {
           'user.firstname AS "firstName"',
           'user.lastname AS "lastName"',
           'user.profile_pic AS "profilePic"',
-          'jr.created_at AS "requestedAt"'
+          'jr.created_at AS "requestedAt"',
         ])
         .where('jr.organization_id = :orgId', { orgId })
-        .andWhere('jr.status = :status', { status: JoinRequestStatus.PENDING })
+        .andWhere('jr.status = :status', { status: JoinRequestStatus.PENDING });
 
       return organizationList;
     } catch (err) {
@@ -267,7 +288,10 @@ export class OrganizationsRepository {
     }
   }
   // 🎯 1. Enforce ownership validation
-  async validateRequestOwnership(orgId: string, requestId: string): Promise<boolean> {
+  async validateRequestOwnership(
+    orgId: string,
+    requestId: string,
+  ): Promise<boolean> {
     try {
       const result = await this.dataSource
         .getRepository(JoinRequest)
@@ -289,36 +313,35 @@ export class OrganizationsRepository {
     try {
       const result = await this.dataSource
         .getRepository(JoinRequest)
-        .update(
-          { id: requestId },
-          { status: JoinRequestStatus.REJECTED }
-        );
+        .update({ id: requestId }, { status: JoinRequestStatus.REJECTED });
       return (result?.affected ?? 0) > 0;
     } catch (err) {
       throw err;
     }
   }
-  async approveJoinRequestAndCreateMembership(requestId: string): Promise<boolean> {
+  async approveJoinRequestAndCreateMembership(
+    requestId: string,
+  ): Promise<boolean> {
     return await this.dataSource.transaction(async (manager) => {
-
       const requestData = await manager.getRepository(JoinRequest).findOne({
-        where: { id: requestId }
+        where: { id: requestId },
       });
 
       if (!requestData) {
-        throw new BadRequestException('Target join request records no longer exist.');
+        throw new BadRequestException(
+          'Target join request records no longer exist.',
+        );
       }
 
       requestData.status = JoinRequestStatus.APPROVED;
       await manager.getRepository(JoinRequest).save(requestData);
-
 
       const userOrgLink = manager.create(UserOrganization, {
         user_id: requestData.user_id,
         org_id: requestData.organization_id,
         role: OrganizationRole.MEMBER,
         joined_date: new Date(),
-        is_deleted: false
+        is_deleted: false,
       });
 
       await manager.save(userOrgLink);
@@ -330,32 +353,36 @@ export class OrganizationsRepository {
     const org = await this.dataSource.getRepository(Organization).findOne({
       where: {
         id: organizationId,
-        status: OrganizationStatus.ACTIVE
-      }
+        status: OrganizationStatus.ACTIVE,
+      },
     });
     return !!org;
   }
 
-
-  async checkExistingRequest(userId: string, organizationId: string): Promise<boolean> {
+  async checkExistingRequest(
+    userId: string,
+    organizationId: string,
+  ): Promise<boolean> {
     const existing = await this.dataSource.getRepository(JoinRequest).findOne({
       where: {
         user_id: userId,
         organization_id: organizationId,
-      }
+      },
     });
     return !!existing;
   }
 
-
-  async enterJoinOrganizationRequest(userId: string, organizationId: string): Promise<JoinRequest> {
+  async enterJoinOrganizationRequest(
+    userId: string,
+    organizationId: string,
+  ): Promise<JoinRequest> {
     const requestRepo = this.dataSource.getRepository(JoinRequest);
 
     const newRequest = requestRepo.create({
       user_id: userId,
       organization_id: organizationId,
       status: JoinRequestStatus.PENDING,
-      created_at: new Date()
+      created_at: new Date(),
     });
 
     return await requestRepo.save(newRequest);
