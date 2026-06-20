@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { DataSource, Repository } from "typeorm";
-import { User } from "./entities/user.entity";
-import { Auth } from "../auth/entities/auth.entity";
-import { UserStatus } from "src/config/enum";
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { Auth } from '../auth/entities/auth.entity';
+import { UserStatus } from 'src/config/enum';
+import { UserDTO } from './dto/user.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -11,7 +16,7 @@ export class UsersRepository {
     @InjectRepository(User)
     private readonly repo: Repository<User>,
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   async findByEmail(email: string) {
     return await this.repo.findOne({
@@ -31,7 +36,7 @@ export class UsersRepository {
         'status',
         'profile_pic',
         'created_at',
-        'updated_at'
+        'updated_at',
       ],
       // relations: ['auth', 'userOrganizations']
     });
@@ -55,11 +60,7 @@ export class UsersRepository {
   }
 
   async registerAsUser(userId: string, roleId: number): Promise<User> {
-
-    await this.repo.update(
-      { user_id: userId },
-      { role: roleId }
-    );
+    await this.repo.update({ user_id: userId }, { role: roleId });
 
     const updatedUser = await this.findByEmailById(userId);
     if (!updatedUser) {
@@ -73,24 +74,38 @@ export class UsersRepository {
     return await this.repo.findOne({
       where: { user_id: userId, is_deleted: false },
       select: [
-        'user_id', 'firstname', 'lastname', 'email',
-        'oauth_provider', 'oauth_id', 'email_verified',
-        'role', 'status', 'profile_pic', 'created_at', 'updated_at'
-      ]
+        'user_id',
+        'firstname',
+        'lastname',
+        'email',
+        'oauth_provider',
+        'oauth_id',
+        'email_verified',
+        'role',
+        'status',
+        'profile_pic',
+        'created_at',
+        'updated_at',
+      ],
     });
   }
 
-  async deActivateAccount(userId: string, status: number): Promise<{ success: boolean }> {
+  async deActivateAccount(
+    userId: string,
+    status: number,
+  ): Promise<{ success: boolean }> {
     const result = await this.repo.update(
       { user_id: userId },
       {
         status: status,
-        is_deleted: true
-      }
+        is_deleted: true,
+      },
     );
 
     if (result.affected === 0) {
-      throw new NotFoundException('User account not found or already deactivated');
+      throw new NotFoundException(
+        'User account not found or already deactivated',
+      );
     }
 
     return { success: true };
@@ -99,29 +114,41 @@ export class UsersRepository {
   async deletedAccount(user_id: string) {
     try {
       const result = await this.dataSource
-      .getRepository(User)
-      .update(
-        { user_id: user_id }, 
-        { status: UserStatus.DELETED }
-      );
+        .getRepository(User)
+        .update({ user_id: user_id }, { status: UserStatus.DELETED });
       return (result?.affected ?? 0) > 0;
     } catch (err) {
       throw err;
     }
   }
 
-  async removeAvatar(userId:string){
-  try{
+  async removeAvatar(userId: string) {
+    try {
       const result = await this.dataSource
-      .getRepository(User)
-      .update(
-        { user_id: userId}, 
-        { profile_pic: null }
-      );
+        .getRepository(User)
+        .update({ user_id: userId }, { profile_pic: null });
       return (result?.affected ?? 0) > 0;
-  }catch(err){
-    throw err;
-  }
+    } catch (err) {
+      throw err;
+    }
   }
 
+  async updateProfile(userId: string, input: UserDTO): Promise<boolean> {
+    try {
+      const updatePayload: Partial<User> = {};
+      if (input.firstname !== undefined)
+        updatePayload.firstname = input.firstname;
+      if (input.lastname !== undefined) updatePayload.lastname = input.lastname;
+
+      const result = await this.dataSource
+        .getRepository(User)
+        .update({ user_id: userId }, updatePayload);
+
+      return (result?.affected ?? 0) > 0;
+    } catch (err) {
+      throw new InternalServerErrorException(
+        'Failed to update user profile in database.',
+      );
+    }
+  }
 }

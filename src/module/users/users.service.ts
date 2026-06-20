@@ -4,7 +4,7 @@ import { UserDataDto } from "../auth/dto/SignUpDTO.dto";
 import { UserRole, UserStatus } from "src/config/enum";
 import * as bcrypt from 'bcrypt';
 import { AuthRepository } from "../auth/auth.repository";
-import { JoinOrganizationDto, UpdatePasswordDto } from "./dto/user.dto";
+import { JoinOrganizationDto, UpdatePasswordDto, UserDTO } from "./dto/user.dto";
 import { IAuthenticatedUser } from "src/interfaces/user.interfaces";
 import { OrganizationsService } from "../organizations/organizations.service";
 
@@ -147,5 +147,26 @@ export class UsersService{
     }catch(err){
       throw err;
     }
+  }
+  async updateProfile(userId : string,input:UserDTO){
+    try{
+     if (!input || (input.firstname === undefined && input.lastname === undefined)) {
+        throw new BadRequestException(
+          "Profile update failed: At least one field (firstname or lastname) must be provided."
+        );
+      }
+    const result =  await this.usersRepository.updateProfile(userId,input);
+  if (result) {
+      return {
+        message: 'Update successfully'
+      };
+    }
+
+    return {
+      message: 'No changes were made to the profile'
+    };
+}catch(err){
+  throw err;
+}
   }
 }
