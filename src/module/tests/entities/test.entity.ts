@@ -1,33 +1,46 @@
-import { OwnerType, TestStatus } from "src/config/enum";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { TestSet } from "./testset.entity";
-import { Question } from "./question.entity";
+import { OwnerType, TestStatus } from 'src/config/enum';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { TestSet } from './testset.entity';
+import { Question } from './question.entity';
 
 //the container/folder
 @Entity('test')
 export class Test {
-    @PrimaryGeneratedColumn('uuid')
-    test_id: string;
+  @PrimaryGeneratedColumn('uuid')
+  test_id: string;
 
-    @Column({ length: 100 })
-    name: string;
+  @Column({ length: 100 })
+  name: string;
 
-    @Column({ type: "smallint" })
-    owner_type: OwnerType; // Admin or Organization
+  @Column({ type: 'text', nullable: true })
+  description?: string | null;
 
-    @Column({ type: "uuid" })
-    owner_id: string; // UUID of admin or organization
+  @Column({ type: 'integer', default: 0 })
+  total_set: number;
 
-    @Column({ type: "smallint", default: TestStatus.ACTIVE })
-    status: TestStatus;
+  @Column({ type: 'smallint' })
+  owner_type: OwnerType; // Admin or Organization
 
-    @CreateDateColumn({ type: "timestamptz" })
-    created_at: Date;
+  @Column({ type: 'uuid' })
+  owner_id: string; // UUID of admin or organization
 
-    @UpdateDateColumn({ type: "timestamptz", nullable: true })
-    updated_at?: Date;
+  @Column({ type: 'smallint', default: TestStatus.ACTIVE })
+  status: TestStatus;
 
-    // Relations
-    @OneToMany(() => TestSet, (set) => set.test)
-    sets: TestSet[];
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', nullable: true })
+  updated_at?: Date;
+
+  // Relations
+  @OneToMany(() => TestSet, (set) => set.test)
+  sets: TestSet[];
 }
