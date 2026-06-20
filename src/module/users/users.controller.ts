@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Patch,
   Put,
   Req,
@@ -82,6 +84,7 @@ export class UsersController {
   }
 
   @Put('/profile')
+  @HttpCode(HttpStatus.OK)
   async updateProfile(
     @User() user: IAuthenticatedUser,
     @Body() input: UserDTO,
