@@ -22,6 +22,7 @@ import { RoleGuard } from 'src/guards/role.guard';
 import { UserRole } from 'src/config/enum';
 import { Organization } from 'src/decorators/organization.decorator';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
+import { CreateTestSetDto, UpdateTestSetDto } from './dto/testset.dto';
 
 @Controller('tests')
 @UseGuards(RoleGuard)
@@ -111,30 +112,108 @@ export class TestController {
   }
 
   //Testset
-  @Post('/testset')
-  async createTestSet() {}
-  @Get('/testset/count')
-  async getAllTestSetCount() {}
+  @Post('/testset/:testId')
+  @Roles(UserRole.ORGANIZATION)
+  async createTestSet(
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Body() input: CreateTestSetDto,
+    @Organization() organization: IOrganization,
+  ) {
+    return await this.testSetService.createTestSet(organization, testId, input);
+  }
 
-  @Get('/testset/list')
-  async getAllTestSetList() {}
-  @Get('/testset/:testSetId')
-  async getTestSet() {}
-  @Patch('/testset/:testSetId')
-  async updateTestSet() {}
-  @Delete('/testset/:testSetId')
-  async deleteTestSet() {}
+  @Get('/:testId/testset/count')
+  @Roles(UserRole.ADMIN, UserRole.ORGANIZATION, UserRole.STUDENT)
+  async getAllTestSetCount(
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Organization() organization: IOrganization,
+    @Query('orgId', new ParseUUIDPipe({ version: '4', optional: true }))
+    orgId?: string,
+    @Query('status', new ParseIntPipe({ optional: true })) status?: number,
+  ) {
+    return await this.testSetService.getAllTestSetCount(
+      organization,
+      testId,
+      orgId,
+      status,
+    );
+  }
 
-  // Question
-  @Post('/question')
-  async createQuestion() {}
+  @Get('/:testId/testset/list')
+  @Roles(UserRole.ADMIN, UserRole.ORGANIZATION, UserRole.STUDENT)
+  async getAllTestSetList(
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Organization() organization: IOrganization,
+    @Query('orgId', new ParseUUIDPipe({ version: '4', optional: true }))
+    orgId?: string,
+    @Query('status', new ParseIntPipe({ optional: true })) status?: number,
+  ) {
+    return await this.testSetService.getAllTestSetList(
+      organization,
+      testId,
+      orgId,
+      status,
+    );
+  }
 
-  @Put('/question')
-  async updateQuestion() {}
+  @Get('/:testId/testset/:testSetId')
+  @Roles(UserRole.ADMIN, UserRole.ORGANIZATION, UserRole.STUDENT)
+  async getTestSet(
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Param('testSetId', ParseUUIDPipe) testSetId: string,
+    @Organization() organization: IOrganization,
+    @Query('orgId', new ParseUUIDPipe({ version: '4', optional: true }))
+    orgId?: string,
+  ) {
+    return await this.testSetService.getTestSet(
+      testId,
+      testSetId,
+      organization,
+      orgId,
+    );
+  }
 
-  @Delete('/question')
-  async deleteQuestion() {} //restrict now
+  @Patch('/:testId/testset/:testSetId')
+  @Roles(UserRole.ORGANIZATION)
+  async updateTestSet(
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Param('testSetId', ParseUUIDPipe) testSetId: string,
+    @Body() input: UpdateTestSetDto,
+    @Organization() organization: IOrganization,
+  ) {
+    return await this.testSetService.updateTestSet(
+      organization,
+      testId,
+      testSetId,
+      input,
+    );
+  }
 
-  @Get('/question')
-  async fetchQuestion() {} // not need as question will be fetch based on testset
+  @Patch('/:testId/testset/:testSetId/toggle-status')
+  @Roles(UserRole.ORGANIZATION)
+  async toggleTestSetStatus(
+    @Organization() organization: IOrganization,
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Param('testSetId', ParseUUIDPipe) testSetId: string,
+  ) {
+    return await this.testSetService.toggleTestSetStatus(
+      organization.org_id,
+      testId,
+      testSetId,
+    );
+  }
+
+  @Delete('/:testId/testset/:testSetId')
+  @Roles(UserRole.ORGANIZATION)
+  async deleteTestSet(
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Param('testSetId', ParseUUIDPipe) testSetId: string,
+    @Organization() organization: IOrganization,
+  ) {
+    return await this.testSetService.deleteTestSet(
+      organization,
+      testId,
+      testSetId,
+    );
+  }
 }
