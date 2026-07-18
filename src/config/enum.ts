@@ -59,8 +59,11 @@ export enum CorrectAnswer {
 }
 
 export enum SubmissionType {
-  Manual = 1,
-  AutoSubmit = 2,
+  Manual = 1, // Student clicked the submit button cleanly
+  TIMEOUT = 2, // Timer hit 00:00 and auto-submitted
+  DISCONNECTED = 3, // Caught tab close or browser close via emergency flush
+  SYSTEM_TERMINATED = 4, // Force-submitted by the backend due to exceeding violation limits
+  CRON_FORCE_SUBMIT = 5,
 }
 
 export enum AnswerOption {
@@ -234,4 +237,19 @@ export enum JoinRequestStatus {
   PENDING = 0,
   REJECTED = 1,
   APPROVED = 2,
+}
+
+export enum AnswerEvaluation {
+  SKIPPED = 0,
+  CORRECT = 1,
+  WRONG = 2,
+}
+
+export enum ViolationType {
+  TAB_SWITCH = 1,
+  WINDOW_BLUR = 2,
+  FULLSCREEN_EXIT = 3,
+  CLIPBOARD_COPY = 4,
+  CLIPBOARD_PASTE = 5,
+  DEV_TOOLS = 6,
 }
