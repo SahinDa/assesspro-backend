@@ -18,6 +18,7 @@ import { ResponseInterceptor } from './interceptors/responseinterceptor';
 import { AuthGuard } from './guards/authentication.guard';
 import { RoleGuard } from './guards/role.guard';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { ViolationsModule } from './module/attempts/violations/violations.module';
 @Module({
   imports: [
     // 1. Load the .env file globally
@@ -69,6 +70,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     SubscriptionModule,
     TestModule,
     UserModule,
+    ViolationsModule,
   ],
   controllers: [AppController],
   providers: [
