@@ -253,3 +253,8 @@ export enum ViolationType {
   CLIPBOARD_PASTE = 5,
   DEV_TOOLS = 6,
 }
+
+export enum BookmarkType {
+  TEST = 1,
+  TEST_SET = 2,
+}
