@@ -228,4 +228,33 @@ export class OrganizationsService {
       throw err;
     }
   }
+
+  async isValidUserOrganization(userId: string, orgId: string) {
+    try {
+      return await this.organizationsrepository.isValidUserOrganization(
+        userId,
+        orgId,
+      );
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async isValidUserOrganizationRelation(userId: string, orgId: string) {
+    try {
+      const isValidOrganization = await this.isValid(orgId);
+
+      if (!isValidOrganization) {
+        return false;
+      }
+
+      const isValid = await this.isValidUserOrganization(userId, orgId);
+      if (!isValid) {
+        return false;
+      }
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
 }

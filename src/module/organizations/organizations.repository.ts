@@ -387,4 +387,18 @@ export class OrganizationsRepository {
 
     return await requestRepo.save(newRequest);
   }
+
+  async isValidUserOrganization(userId: string, OrgId: string) {
+    try {
+      return await this.dataSource
+        .getRepository(UserOrganization)
+        .createQueryBuilder('uo')
+        .where('uo.user_id =:userId', { userId })
+        .andWhere('uo.org_id =:OrgId', { OrgId })
+        .andWhere('uo.is_deleted = :isDeleted', { isDeleted: false })
+        .getExists();
+    } catch (err) {
+      throw err;
+    }
+  }
 }
