@@ -43,7 +43,12 @@ export class UsersRepository {
     });
   }
 
-  async createWithAuth(userData: Partial<User>, passwordHash: string) {
+  async createWithAuth(
+    userData: Partial<User>,
+    passwordHash: string,
+    otp: string,
+    otpExpiresAt: Date,
+  ) {
     return await this.dataSource.transaction(async (manager) => {
       // A. Save the Profile to the 'users' table
       const user = manager.create(User, userData);
@@ -53,11 +58,29 @@ export class UsersRepository {
       const auth = manager.create(Auth, {
         user: savedUser, // TypeORM links the user_id automatically here
         password_hash: passwordHash,
+        otp: otp,
+        otp_expires_at: otpExpiresAt,
       });
       await manager.save(auth);
 
       return savedUser;
     });
+  }
+
+  async updateUserStatus(
+    userId: string,
+    status: UserStatus,
+    isemailVarified: boolean,
+  ) {
+    try {
+      return await this.repo.update(
+        { user_id: userId },
+        { status, email_verified: isemailVarified },
+      );
+    } catch (err) {
+      console.log('Fail to update user status in repository');
+      throw err;
+    }
   }
 
   async registerAsUser(userId: string, roleId: number): Promise<User> {

@@ -39,11 +39,32 @@ export class UsersService {
       throw err;
     }
   }
-  async createWithAuth(body: UserDataDto, hash: string) {
+  async createWithAuth(
+    body: UserDataDto,
+    hash: string,
+    otp: string,
+    otpExpiresAt: Date,
+  ) {
     try {
-      return this.usersRepository.createWithAuth(body, hash);
+      return this.usersRepository.createWithAuth(body, hash, otp, otpExpiresAt);
     } catch (err) {
       console.log('Fail to create user (createWithAuth)');
+      throw err;
+    }
+  }
+  async updateUserStatus(
+    userId: string,
+    status: UserStatus,
+    isemailVarified: boolean,
+  ) {
+    try {
+      return await this.usersRepository.updateUserStatus(
+        userId,
+        status,
+        isemailVarified,
+      );
+    } catch (err) {
+      console.log('Fail to update user status');
       throw err;
     }
   }

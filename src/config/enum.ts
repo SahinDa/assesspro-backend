@@ -21,6 +21,7 @@ export enum UserStatus {
   ON_HOLD = 0,
   ACTIVE = 1,
   DELETED = 2,
+  PENDING = 3,
 }
 
 export enum OrganizationStatus {

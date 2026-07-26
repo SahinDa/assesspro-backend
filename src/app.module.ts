@@ -19,6 +19,7 @@ import { AuthGuard } from './guards/authentication.guard';
 import { RoleGuard } from './guards/role.guard';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { ViolationsModule } from './module/attempts/violations/violations.module';
+import { MailModule } from './module/mail/mail.module';
 @Module({
   imports: [
     // 1. Load the .env file globally
@@ -71,6 +72,7 @@ import { ViolationsModule } from './module/attempts/violations/violations.module
     TestModule,
     UserModule,
     ViolationsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
