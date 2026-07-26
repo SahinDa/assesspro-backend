@@ -19,6 +19,7 @@ import { Public } from 'src/decorators/public.decorator';
 import { RoleGuard } from 'src/guards/role.guard';
 import { Roles } from 'src/decorators/role.decorator';
 import { UserRole } from 'src/config/enum';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/PasswordDTO.dto';
 
 @Controller('auth')
 @UseGuards(RoleGuard)
@@ -63,6 +64,22 @@ export class AuthController {
   ) {
     const accessToken = request.cookies['accessToken'];
     return this.authService.logout(accessToken);
+  }
+
+  // 1. Endpoint to request the OTP (User submits their email)
+  //POST /auth/forgot-password
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(@Body() input: ForgotPasswordDto) {
+    return this.authService.forgotPassword(input);
+  }
+
+  // 2. Endpoint to verify OTP and update the password (User submits email, OTP, and new password)
+  // POST /auth/reset-password-otp
+  @Public()
+  @Post('reset-password')
+  async resetPassword(@Body() input: ResetPasswordDto) {
+    return this.authService.resetPassword(input);
   }
 
   @Delete('/:id/logout')

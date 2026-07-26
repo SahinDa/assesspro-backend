@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -15,6 +16,9 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthProvider, UserRole, UserStatus } from 'src/config/enum';
 import { LoginDto } from './dto/LogInDTO.dto';
 import { MailService } from '../mail/mail.service';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/PasswordDTO.dto';
+import * as crypto from 'crypto';
+import { APP_URLS } from 'src/config/url';
 
 @Injectable()
 export class AuthService {
@@ -269,6 +273,116 @@ export class AuthService {
     } catch (err) {
       console.error('Logout error processing:', err);
       throw err;
+    }
+  }
+  async forgotPassword(input: ForgotPasswordDto) {
+    try {
+      const { email } = input;
+      const user = await this.usersService.findByEmail(email);
+
+      if (!user) {
+        return {
+          message: 'If the email exists, a password reset link has been sent.',
+        };
+      }
+
+      // Generate a secure 64-character random hex token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+
+      // Set expiration time (15 minutes from now)
+      const resetExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+      const auth = await this.authRepository.findCredentialsByUserId(
+        user.user_id,
+      );
+      if (!auth) {
+        throw new UnauthorizedException('Unable to fetch user details');
+      }
+
+      auth.reset_token = resetToken;
+      auth.reset_token_expires_at = resetExpiresAt;
+
+      await this.authRepository.saveUserAuthDatails(auth);
+
+      const resetUrl = `${APP_URLS.frontendUrl}/reset-password?token=${resetToken}&email=${email}`;
+      // Send email using your MailService
+      await this.mailService.sendMail(
+        email,
+        'Password Reset Link - AssessPro',
+        'forgot-password',
+        {
+          name: user.firstname || 'User',
+          resetUrl,
+        },
+      );
+
+      return { message: 'Password reset link sent to your email.' };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Failed to process forgot password request',
+      );
+    }
+  }
+
+  // 2. Service for Reset Password (Verifies OTP, hashes new password, and updates user)
+  async resetPassword(input: ResetPasswordDto) {
+    try {
+      const { email, token, password } = input;
+
+      const user = await this.usersService.findByEmail(email);
+
+      if (!user) {
+        throw new BadRequestException('Invalid or expired password reset link');
+      }
+
+      const auth = await this.authRepository.findCredentialsByUserId(
+        user.user_id,
+      );
+
+      // Validate record, token match, and expiration
+      if (
+        !auth ||
+        auth.reset_token !== token ||
+        !auth.reset_token_expires_at ||
+        new Date() > auth.reset_token_expires_at
+      ) {
+        throw new BadRequestException('Invalid or expired password reset link');
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const payload = {
+        userid: user.user_id,
+        email: user.email,
+      };
+
+      const accessToken = await this.jwtService.signAsync(payload, {
+        expiresIn: '30m',
+      });
+      const refreshToken = await this.jwtService.signAsync(
+        { userid: user.user_id },
+        { expiresIn: '1d' },
+      );
+
+      // Update fields and save using your repository method
+      auth.password_hash = hashedPassword;
+      auth.reset_token = null;
+      auth.reset_token_expires_at = null;
+      auth.refresh_token = await bcrypt.hash(refreshToken, 10);
+      auth.last_login = new Date();
+
+      await this.authRepository.saveUserAuthDatails(auth);
+
+      return {
+        message: 'Password has been successfully reset. You can now log in.',
+        accessToken,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to reset password');
     }
   }
 }
