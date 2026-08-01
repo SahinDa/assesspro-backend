@@ -6,13 +6,13 @@ export class SaveViolationRulesDto {
   @IsNumber()
   @IsOptional()
   @Min(1)
-  @Max(100) 
+  @Max(100)
   max_score_allowed?: number;
 
   @IsNumber()
   @IsOptional()
-  @Min(20) 
-  @Max(60) 
+  @Min(20)
+  @Max(60)
   time_interval_seconds?: number;
 
   @IsObject()
@@ -26,15 +26,14 @@ export class SaveViolationRulesDto {
       Object.keys(value).forEach((key) => {
         const numKey = Number(key);
         let scoreVal = Number(value[key]) || 0;
-        
-      
+
         if (scoreVal < 0) scoreVal = 0;
         if (scoreVal > 10) scoreVal = 10;
-        
+
         sanitizedMap[numKey] = scoreVal;
       });
     }
     return sanitizedMap;
   })
-  violation_weights?: Record<number, number>; 
+  violation_weights?: Record<number, number>;
 }
