@@ -2,23 +2,53 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { createTestDto, updateTestDto } from '../dto/test.dto';
 import { TestRepository } from '../repositories/test.repository';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
-import { TestStatus, UserRole } from 'src/config/enum';
+import {
+  PlatformSubscriptionFeatureKey,
+  TestStatus,
+  UserRole,
+} from 'src/config/enum';
 import { OrganizationsService } from 'src/module/organizations/organizations.service';
+import { SubscriptionService } from 'src/module/subscriptions/subscription.service';
 
 @Injectable()
 export class TestService {
   constructor(
     private readonly testRepository: TestRepository,
+    @Inject(forwardRef(() => OrganizationsService))
     private readonly organizationsservice: OrganizationsService,
+    @Inject(forwardRef(() => SubscriptionService))
+    private readonly subscriptionservice: SubscriptionService,
   ) {}
+
   async createTest(organization: IOrganization, input: createTestDto) {
     try {
+      const subscriptionData =
+        await this.subscriptionservice.getOrganizationUsage(organization);
+
+      const limits = subscriptionData.limits as Record<
+        string,
+        number | boolean
+      >;
+      const maxAllowedTests =
+        Number(limits[PlatformSubscriptionFeatureKey.MAX_TESTS]) || 0;
+      const currentTestCount = subscriptionData.usage.currentTestCount || 0;
+
+      // 2. BLOCK if limit is reached or exceeded
+      if (currentTestCount >= maxAllowedTests) {
+        throw new ForbiddenException(
+          `Plan limit reached. Your current plan allows a maximum of ${maxAllowedTests} tests.`,
+        );
+      }
+
       const isTestExist = await this.testRepository.isTestExist(
         organization.org_id,
         input.name,
@@ -313,6 +343,34 @@ export class TestService {
       return {
         message: `Test status successfully updated to ${TestStatus[newStatus]}.`,
       };
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getTestSetCountPerTest(organization: IOrganization, orgId?: string) {
+    try {
+      let targetOrgId: string | undefined;
+      if (organization.role === UserRole.ORGANIZATION) {
+        targetOrgId = organization.org_id;
+      } else if (organization.role === UserRole.ADMIN) {
+        targetOrgId = orgId;
+      } else {
+        throw new UnauthorizedException('Access Denied');
+      }
+
+      if (!targetOrgId) {
+        throw new BadRequestException('Invalid organization ');
+      }
+      // Transform array of raw results into an object record: { "Math Test": 3, "Physics Test": 9 }
+      const results =
+        await this.testRepository.getTestSetCountPerTest(targetOrgId);
+      const testSetMap: Record<string, number> = {};
+      results.forEach((row) => {
+        testSetMap[row.testName] = parseInt(row.setCount, 10);
+      });
+
+      return testSetMap;
     } catch (err) {
       throw err;
     }

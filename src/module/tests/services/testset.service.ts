@@ -9,7 +9,13 @@ import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { CreateTestSetDto, UpdateTestSetDto } from '../dto/testset.dto';
 import { OrganizationsService } from 'src/module/organizations/organizations.service';
 import { TestRepository } from '../repositories/test.repository';
-import { TestSetStatus, TestStatus, UserRole } from 'src/config/enum';
+import {
+  PlatformSubscriptionFeatureKey,
+  TestSetStatus,
+  TestStatus,
+  UserRole,
+} from 'src/config/enum';
+import { SubscriptionService } from 'src/module/subscriptions/subscription.service';
 
 @Injectable()
 export class TestSetService {
@@ -17,8 +23,8 @@ export class TestSetService {
     private readonly testSetRepository: TestSetRepository,
     private readonly organizationsservice: OrganizationsService,
     private readonly testRepository: TestRepository,
+    private readonly subscriptionservice: SubscriptionService,
   ) {}
-
   async createTestSet(
     organization: IOrganization,
     testId: string,
@@ -51,9 +57,43 @@ export class TestSetService {
         );
       }
 
+      const subscriptionData =
+        await this.subscriptionservice.getOrganizationUsage(organization);
+
+      const limits = subscriptionData.limits as Record<
+        string,
+        number | boolean
+      >;
+      const maxAllowedSetsPerTest =
+        Number(limits[PlatformSubscriptionFeatureKey.MAX_SETS_PER_TEST]) || 0;
+      const maxAllowedQuestionPerTest =
+        Number(limits[PlatformSubscriptionFeatureKey.MAX_QUESTIONS_PER_SET]) ||
+        0;
+
+      // 3. Get current test set count specifically for THIS test name from the map
+      const testSetMap =
+        (subscriptionData.usage.currentTestSetPerTest as Record<
+          string,
+          number
+        >) || {};
+      const currentSetsCount = testSetMap[testDetails.name] || 0;
+
+      // 4. BLOCK if limit is reached or exceeded
+      if (currentSetsCount >= maxAllowedSetsPerTest) {
+        throw new ForbiddenException(
+          `Plan limit reached. Your current plan allows a maximum of ${maxAllowedSetsPerTest} test sets per test.`,
+        );
+      }
+
       if (input.total_questions !== input.questions.length) {
         throw new BadRequestException(
           'Number of question should be exactly same with total question',
+        );
+      }
+
+      if (input.questions.length > maxAllowedQuestionPerTest) {
+        throw new ForbiddenException(
+          `Plan limit exceeded. Your current plan allows a maximum of ${maxAllowedQuestionPerTest} questions per test set, but you tried to add ${input.questions.length}.`,
         );
       }
 
@@ -510,6 +550,16 @@ export class TestSetService {
       return await this.testSetRepository.getTestSetDetails(testSetId);
     } catch (err) {
       throw null;
+    }
+  }
+  async isTestSetBelongsToOrg(testSetId: string, orgId: string) {
+    try {
+      return await this.testSetRepository.isTestSetBelongsToOrg(
+        testSetId,
+        orgId,
+      );
+    } catch (err) {
+      throw err;
     }
   }
 }

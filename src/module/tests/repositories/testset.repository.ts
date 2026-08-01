@@ -4,6 +4,7 @@ import { DataSource } from 'typeorm';
 import { TestSet } from '../entities/testset.entity';
 import { Question } from '../entities/question.entity';
 import { TestSetStatus } from 'src/config/enum';
+import { Test } from '../entities/test.entity';
 
 @Injectable()
 export class TestSetRepository {
@@ -238,6 +239,25 @@ export class TestSetRepository {
       return await this.dataSource
         .getRepository(TestSet)
         .update({ set_id: testSetId }, { status: newStatus });
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async isTestSetBelongsToOrg(
+    testSetId: string,
+    orgId: string,
+  ): Promise<boolean> {
+    try {
+      const count = await this.dataSource
+        .getRepository(TestSet)
+        .createQueryBuilder('testset')
+        .innerJoin(Test, 'test', 'test.test_id = testset.test_id')
+        .where('testset.set_id = :testSetId', { testSetId })
+        .andWhere('test.owner_id = :orgId', { orgId })
+        .getCount();
+
+      return count > 0;
     } catch (err) {
       throw err;
     }

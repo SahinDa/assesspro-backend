@@ -4,6 +4,7 @@ import { Test } from '../entities/test.entity';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { createTestDto, updateTestDto } from '../dto/test.dto';
 import { TestStatus } from 'src/config/enum';
+
 @Injectable()
 export class TestRepository {
   constructor(private readonly dataSource: DataSource) {}
@@ -157,6 +158,22 @@ export class TestRepository {
         .getRepository(Test)
         .update({ test_id: testId, owner_id: orgId }, { status: newStatus });
       return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getTestSetCountPerTest(targetOrgId: string) {
+    try {
+      return await this.dataSource
+        .getRepository(Test)
+        .createQueryBuilder('test')
+        .leftJoin('test.sets', 'testset')
+        .select('test.name', 'testName')
+        .addSelect('COUNT(testset.set_id)', 'setCount')
+        .where('test.owner_id = :targetOrgId', { targetOrgId })
+        .groupBy('test.test_id, test.name')
+        .getRawMany();
     } catch (err) {
       throw err;
     }

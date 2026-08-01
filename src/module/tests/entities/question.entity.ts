@@ -35,28 +35,28 @@ export class Question {
   })
   question_text: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 250 })
   @IsString()
   @IsNotEmpty()
-  @Length(1, 255, { message: 'Option A cannot exceed 255 characters.' })
+  @Length(1, 250, { message: 'Option A cannot exceed 250 characters.' })
   option_a: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 250 })
   @IsString()
   @IsNotEmpty()
-  @Length(1, 255, { message: 'Option B cannot exceed 255 characters.' })
+  @Length(1, 250, { message: 'Option B cannot exceed 250 characters.' })
   option_b: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 250 })
   @IsString()
   @IsNotEmpty()
-  @Length(1, 255, { message: 'Option C cannot exceed 255 characters.' })
+  @Length(1, 250, { message: 'Option C cannot exceed 250 characters.' })
   option_c: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 250 })
   @IsString()
   @IsNotEmpty()
-  @Length(1, 255, { message: 'Option D cannot exceed 255 characters.' })
+  @Length(1, 250, { message: 'Option D cannot exceed 250 characters.' })
   option_d: string;
 
   @Column({ type: 'enum', enum: CorrectAnswer })

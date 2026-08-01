@@ -26,7 +26,6 @@ import { CreateTestSetDto, UpdateTestSetDto } from './dto/testset.dto';
 
 @Controller('tests')
 @UseGuards(RoleGuard)
-@Roles(UserRole.ORGANIZATION, UserRole.ADMIN)
 export class TestController {
   constructor(
     private readonly testService: TestService,
@@ -36,18 +35,18 @@ export class TestController {
 
   //Test
   @Post()
-  @Roles(UserRole.ORGANIZATION, UserRole.ADMIN)
+  @Roles(UserRole.ORGANIZATION)
   @ApiOperation({ summary: 'Create a new test' })
   @ApiResponse({
     status: 201,
     description: 'The test has been successfully created.',
   })
   @ApiBody({ type: createTestDto })
-  async create(
+  async createTest(
     @Organization() organization: IOrganization,
-    @Body() body: createTestDto,
+    @Body() input: createTestDto,
   ) {
-    return await this.testService.createTest(organization, body);
+    return await this.testService.createTest(organization, input);
   }
 
   @Get('/count')
@@ -215,5 +214,14 @@ export class TestController {
       testId,
       testSetId,
     );
+  }
+
+  @Get('/sets-per-test')
+  @Roles(UserRole.ORGANIZATION, UserRole.ADMIN)
+  async getTestSetCountPerTest(
+    @Organization() organization: IOrganization,
+    @Query('orgId') orgId?: string,
+  ) {
+    return await this.testService.getTestSetCountPerTest(organization, orgId);
   }
 }
