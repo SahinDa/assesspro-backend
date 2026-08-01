@@ -1,15 +1,15 @@
-import { 
-  Entity, 
-  PrimaryGeneratedColumn, 
-  Column, 
-  CreateDateColumn, 
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
   UpdateDateColumn,
-  Index
+  Index,
 } from 'typeorm';
 import { JoinRequestStatus } from 'src/config/enum';
 
 @Entity('join_requests')
-@Index(['user_id', 'organization_id']) 
+@Index(['user_id', 'organization_id'])
 export class JoinRequest {
   @PrimaryGeneratedColumn('uuid')
   id: string;

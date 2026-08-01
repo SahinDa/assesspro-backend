@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   forwardRef,
   Inject,
   Injectable,
@@ -17,7 +18,11 @@ import {
 import { IAuthenticatedUser } from 'src/interfaces/user.interfaces';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { UsersService } from '../users/users.service';
-import { JoinRequestStatus } from 'src/config/enum';
+import {
+  JoinRequestStatus,
+  PlatformSubscriptionFeatureKey,
+} from 'src/config/enum';
+import { SubscriptionService } from '../subscriptions/subscription.service';
 
 @Injectable()
 export class OrganizationsService {
@@ -25,6 +30,8 @@ export class OrganizationsService {
     private readonly organizationsrepository: OrganizationsRepository,
     @Inject(forwardRef(() => UsersService))
     private readonly usersservice: UsersService,
+    @Inject(forwardRef(() => SubscriptionService))
+    private readonly subscriptionservice: SubscriptionService,
   ) {}
   async createOrganizations(
     user: IAuthenticatedUser,
@@ -165,11 +172,12 @@ export class OrganizationsService {
     }
   }
   async handleJoinRequestStatus(
-    orgId: string,
+    organization: IOrganization,
     requestId: string,
     input: HandleJoinRequestDto,
   ) {
     try {
+      const orgId = organization.org_id;
       const isValid =
         await this.organizationsrepository.validateRequestOwnership(
           orgId,
@@ -180,6 +188,26 @@ export class OrganizationsService {
         throw new UnauthorizedException(
           'You are not authorized to modify this resource.',
         );
+      }
+
+      if (input.action === JoinRequestStatus.APPROVED) {
+        const subscriptionData =
+          await this.subscriptionservice.getOrganizationUsage(organization);
+
+        const limits = subscriptionData.limits as Record<
+          string,
+          number | boolean
+        >;
+        const maxAllowedUser =
+          Number(limits[PlatformSubscriptionFeatureKey.MAX_USERS]) || 0;
+        const currentUserCount = subscriptionData.usage.currentUserCount || 0;
+
+        // BLOCK if limit is reached or exceeded
+        if (currentUserCount >= maxAllowedUser) {
+          throw new ForbiddenException(
+            `Plan limit reached. Your current plan allows a maximum of ${maxAllowedUser} users.`,
+          );
+        }
       }
 
       if (input.action === JoinRequestStatus.REJECTED) {

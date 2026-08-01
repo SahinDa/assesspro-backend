@@ -101,7 +101,7 @@ export class OrganizationsController {
     @Organization() organization: IOrganization,
   ) {
     return this.organizationsservice.handleJoinRequestStatus(
-      organization.org_id,
+      organization,
       requestId,
       input,
     );
