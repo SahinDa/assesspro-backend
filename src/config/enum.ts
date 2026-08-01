@@ -259,3 +259,15 @@ export enum BookmarkType {
   TEST = 1,
   TEST_SET = 2,
 }
+
+export enum PlatformSubscriptionFeatureKey {
+  MAX_USERS = 'max_users',
+  MAX_TESTS = 'max_tests',
+  MAX_SETS_PER_TEST = 'max_sets_per_test',
+  MAX_QUESTIONS_PER_SET = 'max_questions_per_set',
+}
+
+export enum OrganizationSubscriptionFeatureKey {
+  MAX_TEST_SETS = 'max_test_sets',
+  MAX_REATTEMPTS = 'max_reattempts',
+}

@@ -4,48 +4,53 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  Index
-} from "typeorm";
-import {OrgSubscriptionPlan, OrgSubscriptionStatus } from "src/config/enum";
+  Index,
+} from 'typeorm';
+import {
+  OrgSubscriptionStatus,
+  OrgBillingCycle,
+  PlatformSubscriptionFeatureKey,
+} from 'src/config/enum';
 
-@Entity("subscriptions_organization")
-@Index(["organization_id"]) // fast lookup per org
+@Entity('subscriptions_organization')
+@Index(['organization_id'], { unique: true }) // Enforces strictly ONE active state row per organization
+@Index(['status']) // Fast filtering for active/expired states
+@Index(['gateway_subscription_id']) // Fast lookup when webhook triggers arrive from payment gateway
 export class OrgSubscription {
-
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   subscription_id: string;
 
-  @Column("uuid")
-  organization_id: string; 
+  @Column('uuid', { unique: true })
+  organization_id: string;
 
-  @Column({ type: "smallint" })
-  plan: OrgSubscriptionPlan; 
+  @Column('uuid')
+  transaction_id: string; // Points to the latest transaction/invoice ledger record
 
-  @Column({ type: "timestamptz" })
-  start_date: Date;         
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  gateway_subscription_id?: string | null; // e.g., Razorpay subscription ID (sub_xxxxxxxxxx) for auto-renewals
 
-  @Column({ type: "timestamptz" })
-  end_date: Date;         
+  @Column({ type: 'varchar', length: 50 })
+  plan_name: string; // Snapshotted name (e.g., "Pro Plan") safe from future edits/deletions
 
-  @Column({ type: "smallint", default: OrgSubscriptionStatus.Active })
-  status: OrgSubscriptionStatus; 
+  @Column({ type: 'smallint' })
+  billing_cycle: OrgBillingCycle;
 
-  // Feature Limits based on plan
-  @Column({ type: "int", default: 0 })
-  max_users: number;        
+  @Column({ type: 'timestamptz' })
+  start_date: Date;
 
-  @Column({ type: "int", default: 0 })
-  max_tests: number;        
+  @Column({ type: 'timestamptz' })
+  end_date: Date; // Automatically pushed forward during early renewals, proration, or auto-renewals
 
-  @Column({ type: "int", default: 0 })
-  max_sets_per_test: number; 
+  @Column({ type: 'smallint', default: OrgSubscriptionStatus.Active })
+  status: OrgSubscriptionStatus;
 
-  @Column({ type: "int", default: 0 })
-  max_questions_per_set: number; 
+  // --- Dynamic Platform Feature Limits Snapshot Stored as JSONB ---
+  @Column({ type: 'jsonb', nullable: false, default: {} })
+  features: Record<PlatformSubscriptionFeatureKey, number | boolean>;
 
-  @CreateDateColumn({ type: "timestamptz" })
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: "timestamptz" })
+  @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
 }
