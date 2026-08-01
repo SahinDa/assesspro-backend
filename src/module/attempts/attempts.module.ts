@@ -9,12 +9,16 @@ import { TestModule } from '../tests/test.module';
 import { ExamViolationRule } from './entities/examviolationrules.entity';
 import { ViolationsModule } from './violations/violations.module';
 import { AttemptsCronService } from './attempts.cron.service';
+import { SubscriptionModule } from '../subscriptions/subscription.module';
+import { OrganizationsModule } from '../organizations/organizations.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([AttemptAnswer, TestAttempt, ExamViolationRule]),
     TestModule,
     ViolationsModule,
+    SubscriptionModule,
+    OrganizationsModule,
   ],
   controllers: [AttemptsController],
   providers: [AttemptsService, AttemptsRepository, AttemptsCronService],

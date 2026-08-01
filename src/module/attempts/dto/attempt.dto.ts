@@ -1,37 +1,47 @@
 import { Type } from 'class-transformer';
-import { IsUUID, IsNotEmpty, IsEnum, IsArray, ValidateNested, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsUUID,
+  IsNotEmpty,
+  IsEnum,
+  IsArray,
+  ValidateNested,
+  IsOptional,
+  IsNumber,
+} from 'class-validator';
 import { AnswerOption, SubmissionType, ViolationType } from 'src/config/enum';
 
 export class StartAttemptDto {
-    @IsUUID()
-    @IsNotEmpty()
-    test_id: string;
+  @IsUUID()
+  @IsNotEmpty()
+  test_id: string;
 
-    @IsUUID()
-    @IsNotEmpty()
-    testset_id: string;
+  @IsUUID()
+  @IsNotEmpty()
+  testset_id: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  orgId: string;
 }
 
-
 export class SingleAnswerDto {
-    @IsUUID()
-    question_id: string;
+  @IsUUID()
+  question_id: string;
 
-    @IsEnum(AnswerOption)
-    selected_option: AnswerOption; // 1=A, 2=B, 3=C, 4=D, 0=Skipped
+  @IsEnum(AnswerOption)
+  selected_option: AnswerOption; // 1=A, 2=B, 3=C, 4=D, 0=Skipped
 }
 
 export class SubmitTestDto {
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => SingleAnswerDto)
-    answers: SingleAnswerDto[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SingleAnswerDto)
+  answers: SingleAnswerDto[];
 }
-
 
 export class SaveProgressBulkDto {
   @IsArray()
-  @ValidateNested({each: true })
+  @ValidateNested({ each: true })
   @Type(() => SingleAnswerDto)
   answers: SingleAnswerDto[]; // 🚀 Cleanly validates the array
 }
@@ -54,7 +64,7 @@ export class ReportViolationDto {
   @IsNotEmpty()
   violation_type: ViolationType;
 
-   @IsUUID()
-    @IsNotEmpty()
-    orgId : string;
+  @IsUUID()
+  @IsNotEmpty()
+  orgId: string;
 }

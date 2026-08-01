@@ -5,6 +5,7 @@ import { TestAttempt } from './entities/testattempt.entity';
 import { TestSet } from '../tests/entities/testset.entity';
 import { Question } from '../tests/entities/question.entity';
 import { AttemptAnswer } from './entities/attemptanswer.entity';
+import { Test } from '@nestjs/testing';
 
 @Injectable()
 export class AttemptsRepository {
@@ -342,5 +343,25 @@ export class AttemptsRepository {
       .getRawMany();
 
     return { data, total };
+  }
+
+  async getTotalUniqueTestSetsCountByUser(
+    userId: string,
+    orgId: string,
+  ): Promise<number> {
+    try {
+      const result = await this.dataSource
+        .getRepository(TestAttempt)
+        .createQueryBuilder('attempt')
+        .innerJoin(Test, 'test', 'test.test_id = attempt.test_id')
+        .where('attempt.user_id = :userId', { userId })
+        .andWhere('test.owner_id = :orgId', { orgId })
+        .select('COUNT(DISTINCT attempt.set_id)', 'uniqueCount')
+        .getRawOne();
+
+      return result ? parseInt(result.uniqueCount, 10) || 0 : 0;
+    } catch (err) {
+      throw err;
+    }
   }
 }

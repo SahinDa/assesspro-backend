@@ -17,12 +17,16 @@ import { TestSetService } from '../tests/services/testset.service';
 import {
   AnswerEvaluation,
   AnswerOption,
+  OrganizationSubscriptionFeatureKey,
   SubmissionType,
   ViolationType,
 } from 'src/config/enum';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { ViolationsService } from './violations/violations.service';
+import { SubscriptionService } from '../subscriptions/subscription.service';
+import { IOrganization } from 'src/interfaces/organization.interfaces';
+import { OrganizationsService } from '../organizations/organizations.service';
 
 @Injectable()
 export class AttemptsService {
@@ -31,9 +35,12 @@ export class AttemptsService {
     private readonly testsetservices: TestSetService,
     private readonly violationsService: ViolationsService,
     @InjectRedis() private readonly redis: Redis,
+    private readonly subscriptionservice: SubscriptionService,
+    private readonly organizationsservice: OrganizationsService,
   ) {}
-  async initializeAttempt(userId: string, input: StartAttemptDto) {
+  async initializeAttempt(organization: IOrganization, input: StartAttemptDto) {
     try {
+      const userId = organization.user_id;
       // 1. Structural Check: Verify the configuration exists and is valid
       const testSet = await this.testsetservices.isValidTestSet(
         input.testset_id,
@@ -44,7 +51,27 @@ export class AttemptsService {
         );
       }
 
-      // 2. Business Policy Check: Concurrency session lock
+      const isValidRelation =
+        await this.organizationsservice.isValidUserOrganizationRelation(
+          userId,
+          input.orgId,
+        );
+      if (!isValidRelation) {
+        throw new ForbiddenException(
+          'You are not authorized to take tests under this organization.',
+        );
+      }
+
+      const isValidTestSet = await this.testsetservices.isTestSetBelongsToOrg(
+        input.testset_id,
+        input.orgId,
+      );
+      if (!isValidTestSet) {
+        throw new ForbiddenException(
+          'The requested test set does not belong to this organization.',
+        );
+      }
+
       const isActive = await this.attemptsrepository.isActiveSessionRunning(
         userId,
         input,
@@ -62,9 +89,40 @@ export class AttemptsService {
       );
 
       // 4. Sequence Calculations via light Repository queries
+      // const previousAttemptsCount = await this.attemptsrepository.getAttemptCount(userId, input.testset_id);
+
+      const subscriptionData =
+        await this.subscriptionservice.getOrganizationUsage(organization);
+
+      const limits = subscriptionData.limits as Record<
+        string,
+        number | boolean
+      >;
+      const maxAllowedTestSets =
+        Number(limits[OrganizationSubscriptionFeatureKey.MAX_TEST_SETS]) || 0;
+      const maxAllowedReattempts =
+        Number(limits[OrganizationSubscriptionFeatureKey.MAX_REATTEMPTS]) || 0;
+
+      // Check A: Total unique test sets attempted by this user in this organization
+      const totalUniqueTestSetsAttempted =
+        await this.attemptsrepository.getTotalUniqueTestSetsCountByUser(
+          userId,
+          input.orgId,
+        );
+      if (totalUniqueTestSetsAttempted >= maxAllowedTestSets) {
+        throw new ForbiddenException(
+          `Plan limit exceeded. Your organization's plan allows a maximum of ${maxAllowedTestSets} unique test sets to be attempted.`,
+        );
+      }
+
+      // Check B: Reattempts for this specific test set
       const previousAttemptsCount =
         await this.attemptsrepository.getAttemptCount(userId, input.testset_id);
-
+      if (previousAttemptsCount >= maxAllowedReattempts) {
+        throw new ForbiddenException(
+          `Attempt limit reached. Your organization's plan allows a maximum of ${maxAllowedReattempts} attempt(s) for this test set.`,
+        );
+      }
       // 5. Database execution via clean repository delegation
       const savedAttempt = await this.attemptsrepository.createNewAttempt({
         user_id: userId,

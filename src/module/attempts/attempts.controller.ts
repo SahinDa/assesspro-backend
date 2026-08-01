@@ -27,6 +27,8 @@ import {
 import { InjectRedis } from '@nestjs-modules/ioredis'; // 1. Add this import
 import Redis from 'ioredis';
 import { Public } from 'src/decorators/public.decorator';
+import { Organization } from 'src/decorators/organization.decorator';
+import { IOrganization } from 'src/interfaces/organization.interfaces';
 
 @Controller('attempts')
 @UseGuards(RoleGuard)
@@ -41,10 +43,10 @@ export class AttemptsController {
   @Post('start')
   @Roles(UserRole.STUDENT)
   async startTest(
-    @User() user: IAuthenticatedUser,
+    @Organization() organization: IOrganization,
     @Body() input: StartAttemptDto,
   ) {
-    return await this.attemptsservices.initializeAttempt(user.user_id, input);
+    return await this.attemptsservices.initializeAttempt(organization, input);
   }
 
   @Post(':attemptId/save-progress')
