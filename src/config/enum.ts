@@ -137,6 +137,7 @@ export enum OrgPaymentMethod {
   Card = 2,
   NetBanking = 3,
   Wallet = 4,
+  Other = 99,
 }
 
 export enum OrgPaymentGateway {
