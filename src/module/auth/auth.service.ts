@@ -19,7 +19,6 @@ import { MailService } from '../mail/mail.service';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/PasswordDTO.dto';
 import * as crypto from 'crypto';
 import { APP_URLS } from 'src/config/url';
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -77,7 +76,6 @@ export class AuthService {
       throw err;
     }
   }
-
   async verifyOtp(email: string, enteredOtp: string) {
     try {
       const user = await this.usersService.findByEmail(email);
@@ -140,6 +138,55 @@ export class AuthService {
       };
     } catch (err) {
       throw err;
+    }
+  }
+
+  async sendResetOtp(input: ForgotPasswordDto) {
+    try {
+      const { email } = input;
+
+      const user = await this.usersService.findByEmail(email);
+      if (!user) {
+        // Security best practice: don't reveal if the user exists
+        return { message: 'If the email exists, a new OTP has been sent.' };
+      }
+
+      const auth = await this.authRepository.findCredentialsByUserId(
+        user.user_id,
+      );
+      if (!auth) {
+        throw new UnauthorizedException('Unable to fetch user details');
+      }
+
+      // Generate a new 6-digit OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otp_expires_at = new Date(Date.now() + 5 * 60 * 1000);
+
+      // Save the new OTP and expiration time
+      auth.otp = await bcrypt.hash(otp, 10); // Or store plain text depending on your signup flow
+      auth.otp_expires_at = otp_expires_at;
+
+      await this.authRepository.saveUserAuthDatails(auth);
+
+      // Send the email using your existing 'otp' template
+      await this.mailService.sendMail(
+        email,
+        'Password Reset OTP - AssessPro',
+        'otp',
+        {
+          name: user.firstname || 'User',
+          otp,
+        },
+      );
+
+      return {
+        message: 'A new password reset OTP has been sent to your email.',
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to send OTP');
     }
   }
 
@@ -275,6 +322,7 @@ export class AuthService {
       throw err;
     }
   }
+
   async forgotPassword(input: ForgotPasswordDto) {
     try {
       const { email } = input;

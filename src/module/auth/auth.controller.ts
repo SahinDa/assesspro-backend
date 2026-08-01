@@ -41,6 +41,12 @@ export class AuthController {
   }
 
   @Public()
+  @Post('resend-otp')
+  async resendOtp(@Body() input: ForgotPasswordDto) {
+    return this.authService.sendResetOtp(input);
+  }
+
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async logIn(@Body() loginDto: LoginDto) {
