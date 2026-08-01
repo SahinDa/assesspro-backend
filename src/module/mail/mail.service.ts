@@ -8,10 +8,10 @@ export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendMail(
-    to: string, 
-    subject: string, 
-    templateName: string, 
-    context: Record<string, any>
+    to: string,
+    subject: string,
+    templateName: string,
+    context: Record<string, any>,
   ): Promise<void> {
     try {
       await this.mailerService.sendMail({
@@ -20,9 +20,14 @@ export class MailService {
         template: `./${templateName}`,
         context,
       });
-      this.logger.log(`Email successfully dispatched to ${to} using template: [${templateName}]`);
+      this.logger.log(
+        `Email successfully dispatched to ${to} using template: [${templateName}]`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to send email to ${to} using template [${templateName}]`, error.stack);
+      this.logger.error(
+        `Failed to send email to ${to} using template [${templateName}]`,
+        error.stack,
+      );
       throw new Error('Could not send email. Please try again later.');
     }
   }
