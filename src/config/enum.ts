@@ -259,7 +259,11 @@ export enum BookmarkType {
   TEST = 1,
   TEST_SET = 2,
 }
-
+export enum SupportedCurrency {
+  INR = 'INR',
+  USD = 'USD',
+  EUR = 'EUR',
+}
 export enum PlatformSubscriptionFeatureKey {
   MAX_USERS = 'max_users',
   MAX_TESTS = 'max_tests',

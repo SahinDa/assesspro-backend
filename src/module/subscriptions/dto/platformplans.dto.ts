@@ -1,16 +1,20 @@
 import { PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { 
-  IsString, 
-  IsInt, 
-  IsObject, 
-  IsOptional, 
-  Min, 
+import {
+  IsString,
+  IsInt,
+  IsObject,
+  IsOptional,
+  Min,
   IsNotEmpty,
   MaxLength,
-  IsEnum
+  IsEnum,
 } from 'class-validator';
-import { PlatformBillingCycle, PlatformSubscriptionFeatureKey, SupportedCurrency } from 'src/config/enum';
+import {
+  PlatformBillingCycle,
+  PlatformSubscriptionFeatureKey,
+  SupportedCurrency,
+} from 'src/config/enum';
 
 export class CreatePlatformPlanDto {
   @IsString()
@@ -20,7 +24,7 @@ export class CreatePlatformPlanDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(255) 
+  @MaxLength(255)
   description?: string;
 
   @IsObject()
@@ -32,20 +36,22 @@ export class CreatePlatformPlanDto {
   @IsNotEmpty()
   pricing: Record<PlatformBillingCycle, number>;
 
-  
-@Transform(({ value }) => (!value || value === '' ? SupportedCurrency.INR : value))
-  @IsEnum(SupportedCurrency, { 
-      message: `Currency must be one of the supported options: ${Object.values(SupportedCurrency).join(', ')}` 
+  @Transform(({ value }) =>
+    !value || value === '' ? SupportedCurrency.INR : value,
+  )
+  @IsEnum(SupportedCurrency, {
+    message: `Currency must be one of the supported options: ${Object.values(SupportedCurrency).join(', ')}`,
   })
   currency: string = SupportedCurrency.INR;
-
 }
 
 export class UpdatePlatformPlanDto extends PartialType(CreatePlatformPlanDto) {
   @IsOptional()
-  @Transform(({ value }) => (value !== undefined && value !== null && value !== '' ? value : undefined))
-  @IsEnum(SupportedCurrency, { 
-      message: `Currency must be one of the supported options: ${Object.values(SupportedCurrency).join(', ')}` 
+  @Transform(({ value }) =>
+    value !== undefined && value !== null && value !== '' ? value : undefined,
+  )
+  @IsEnum(SupportedCurrency, {
+    message: `Currency must be one of the supported options: ${Object.values(SupportedCurrency).join(', ')}`,
   })
   currency?: string;
 }
