@@ -1,20 +1,22 @@
-import { Body, Controller, Post } from "@nestjs/common";
-import { PaymentsService } from "./payments.service";
-import { Organization } from "src/decorators/organization.decorator";
-import { IOrganization } from "src/interfaces/organization.interfaces";
-import { CreateOrderDto, MarkPaymentFailedDto, VerifyPaymentDto } from "./dto/payments.dto";
+import { Body, Controller, Post } from '@nestjs/common';
+import { PaymentsService } from './payments.service';
+import { Organization } from 'src/decorators/organization.decorator';
+import { IOrganization } from 'src/interfaces/organization.interfaces';
+import {
+  CreateOrderDto,
+  MarkPaymentFailedDto,
+  VerifyPaymentDto,
+} from './dto/payments.dto';
 
 @Controller('payments')
 export class PaymentsController {
-    constructor(
-        private readonly paymentsservice: PaymentsService,
-    ) { }
+  constructor(private readonly paymentsservice: PaymentsService) {}
 
-    // ==========================================
-    // PAYMENT & ORDER EXECUTION FLOWS
-    // ==========================================
+  // ==========================================
+  // PAYMENT & ORDER EXECUTION FLOWS
+  // ==========================================
 
-    /*
+  /*
       ====================================================================
       RAZORPAY FULL PAYMENT FLOW (End-to-End Architecture)
       ====================================================================
@@ -36,27 +38,27 @@ export class PaymentsController {
       ====================================================================
     */
 
-    // - Generates a secure Razorpay order ID using database plan pricing.
-    @Post('/create-order')
-    async createOrder(
-        @Organization() organization: IOrganization,
-        @Body() input: CreateOrderDto,
-    ) {
-        return await this.paymentsservice.createOrder(organization, input);
-    }
-    // - Validates cryptographic signatures, saves transaction records, and activates subscriptions.
-    @Post('/verify-payment')
-    async verifyPayment(
-        @Organization() organization: IOrganization,
-        @Body() input: VerifyPaymentDto,
-    ) {
-        return await this.paymentsservice.verifyPayment(organization, input);
-    }
-    @Post('/mark-failed')
-    async markPaymentFailed(
-        @Organization() organization:IOrganization,
-        @Body() input: MarkPaymentFailedDto
-    ) {
-        return await this.paymentsservice.markPaymentFailed(organization,input);
-    }
+  // - Generates a secure Razorpay order ID using database plan pricing.
+  @Post('/create-order')
+  async createOrder(
+    @Organization() organization: IOrganization,
+    @Body() input: CreateOrderDto,
+  ) {
+    return await this.paymentsservice.createOrder(organization, input);
+  }
+  // - Validates cryptographic signatures, saves transaction records, and activates subscriptions.
+  @Post('/verify-payment')
+  async verifyPayment(
+    @Organization() organization: IOrganization,
+    @Body() input: VerifyPaymentDto,
+  ) {
+    return await this.paymentsservice.verifyPayment(organization, input);
+  }
+  @Post('/mark-failed')
+  async markPaymentFailed(
+    @Organization() organization: IOrganization,
+    @Body() input: MarkPaymentFailedDto,
+  ) {
+    return await this.paymentsservice.markPaymentFailed(organization, input);
+  }
 }

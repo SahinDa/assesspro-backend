@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   Index,
   ValueTransformer,
-} from "typeorm";
+} from 'typeorm';
 import {
   StudentTransactionStatus,
   StudentPaymentMethod,
@@ -13,7 +13,7 @@ import {
   StudentTransactionFailureReason,
   StudentBillingCycle,
   OrganizationSubscriptionFeatureKey,
-} from "src/config/enum";
+} from 'src/config/enum';
 
 class ColumnNumericTransformer implements ValueTransformer {
   to(data: number): number {
@@ -24,64 +24,62 @@ class ColumnNumericTransformer implements ValueTransformer {
   }
 }
 
-@Entity("student_transactions")
-@Index(["user_id"])
-@Index(["gateway_order_id"])
-@Index(["gateway_transaction_id"])
+@Entity('student_transactions')
+@Index(['user_id'])
+@Index(['gateway_order_id'])
+@Index(['gateway_transaction_id'])
 export class StudentTransaction {
-
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   transaction_id: string;
 
-  @Column("uuid")
+  @Column('uuid')
   user_id: string;
 
-@Column("uuid")
+  @Column('uuid')
   organization_id: string;
-  
-  @Column({ type: "varchar", length:50})
+
+  @Column({ type: 'varchar', length: 50 })
   plan_name: string;
 
-  @Column("uuid")
-  plan_id:string;
+  @Column('uuid')
+  plan_id: string;
 
-  @Column({ type: "smallint" })
+  @Column({ type: 'smallint' })
   billing_cycle: StudentBillingCycle;
 
-  @Column({ 
-    type: "decimal", 
-    precision: 10, 
-    scale: 2, 
-    transformer: new ColumnNumericTransformer() 
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    transformer: new ColumnNumericTransformer(),
   })
   amount: number;
 
-  @Column({ type: "varchar", length: 3, default: "INR" })
+  @Column({ type: 'varchar', length: 3, default: 'INR' })
   currency: string;
 
-  @Column({ type: "smallint", nullable:true })
+  @Column({ type: 'smallint', nullable: true })
   payment_method?: StudentPaymentMethod;
 
-  @Column({ type: "smallint" })
+  @Column({ type: 'smallint' })
   payment_gateway: StudentPaymentGateway;
 
-  @Column({ type: "varchar", length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   gateway_order_id?: string;
 
-  @Column({ type: "varchar", length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   gateway_transaction_id?: string;
 
-  @Column({ type: "smallint" })
+  @Column({ type: 'smallint' })
   status: StudentTransactionStatus;
 
- // --- Dynamic Feature Limits Snapshot Stored as JSONB ---
-     @Column({ type: "jsonb", nullable: false, default: {} })
-     features: Record<OrganizationSubscriptionFeatureKey, number | boolean>;
+  // --- Dynamic Feature Limits Snapshot Stored as JSONB ---
+  @Column({ type: 'jsonb', nullable: false, default: {} })
+  features: Record<OrganizationSubscriptionFeatureKey, number | boolean>;
 
-
-  @Column({ type: "smallint", nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   failure_reason?: StudentTransactionFailureReason;
 
-  @CreateDateColumn({ type: "timestamptz" })
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 }
