@@ -33,7 +33,7 @@ export class InputData {
   })
   lastname?: string;
 
-  @IsEmail() // Specifically validates the email format (e.g., name@domain.com)
+  @IsEmail()
   @IsNotEmpty()
   email: string;
 }
