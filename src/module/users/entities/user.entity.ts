@@ -40,7 +40,7 @@ export class User {
   @Column({ type: 'smallint', default: UserStatus.ACTIVE })
   status: UserStatus;
 
-  @Column({ length: 500, nullable: true })
+  @Column({ type: 'varchar', length: 500, nullable: true })
   profile_pic?: string | null;
 
   @Column({ type: 'boolean', default: false })
