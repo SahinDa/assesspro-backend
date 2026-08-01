@@ -5,6 +5,7 @@ import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { NotificationsRepository } from './notifications.repository';
 import { OrganizationsModule } from '../organizations/organizations.module';
+import { NotificationsCleanupService } from './notification-cleanup.cron';
 
 @Module({
   imports: [
@@ -12,7 +13,11 @@ import { OrganizationsModule } from '../organizations/organizations.module';
     OrganizationsModule,
   ],
   controllers: [NotificationsController],
-  providers: [NotificationsService, NotificationsRepository],
+  providers: [
+    NotificationsService,
+    NotificationsRepository,
+    NotificationsCleanupService,
+  ],
   exports: [NotificationsService, NotificationsRepository],
 })
 export class NotificationsModule {}
