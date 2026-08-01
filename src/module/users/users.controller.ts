@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Patch,
   Put,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -24,6 +25,8 @@ import {
   UserDTO,
 } from './dto/user.dto';
 import { IAuthenticatedUser } from 'src/interfaces/user.interfaces';
+import { Organization } from 'src/decorators/organization.decorator';
+import { IOrganization } from 'src/interfaces/organization.interfaces';
 
 @Controller('users')
 export class UsersController {
@@ -104,10 +107,27 @@ export class UsersController {
     return this.userService.removeAvatar(user.user_id);
   }
 
+  // Get Total Count of Users
   @Get('/list')
   @UseGuards(RoleGuard)
   @Roles(UserRole.ORGANIZATION, UserRole.ADMIN)
-  async getAllUsers() {}
+  async getAllOrgUsers(
+    @Organization() Organization: IOrganization,
+    @Query('orgId') orgId?: string,
+  ) {
+    return this.userService.getAllOrgUsersList(Organization, orgId);
+  }
+
+  // Get Total Count of Users
+  @Get('/count')
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ORGANIZATION, UserRole.ADMIN)
+  async getUserCount(
+    @Organization() organization: IOrganization,
+    @Query('orgId') orgId?: string,
+  ) {
+    return await this.userService.getAllOrgUsersCount(organization, orgId);
+  }
 
   @Get(':userid')
   @UseGuards(RoleGuard)

@@ -6,6 +6,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { UserDataDto } from '../auth/dto/SignUpDTO.dto';
@@ -19,6 +20,7 @@ import {
 } from './dto/user.dto';
 import { IAuthenticatedUser } from 'src/interfaces/user.interfaces';
 import { OrganizationsService } from '../organizations/organizations.service';
+import { IOrganization } from 'src/interfaces/organization.interfaces';
 
 @Injectable()
 export class UsersService {
@@ -205,6 +207,7 @@ export class UsersService {
       throw err;
     }
   }
+
   async removeAvatar(userId: string) {
     try {
       return await this.usersRepository.removeAvatar(userId);
@@ -212,6 +215,15 @@ export class UsersService {
       throw err;
     }
   }
+
+  async getMyOrganizations(userId: string) {
+    try {
+      return this.usersRepository.getMyOrganizations(userId);
+    } catch (err) {
+      throw err;
+    }
+  }
+
   async updateProfile(userId: string, input: UserDTO) {
     try {
       if (
@@ -236,9 +248,42 @@ export class UsersService {
       throw err;
     }
   }
-  async getMyOrganizations(userId: string) {
+
+  async getAllOrgUsersList(organization: IOrganization, orgId?: string) {
     try {
-      return this.usersRepository.getMyOrganizations(userId);
+      let targetOrgId: string | undefined;
+      if (organization.role === UserRole.ORGANIZATION) {
+        targetOrgId = organization.org_id;
+      } else if (organization.role === UserRole.ADMIN) {
+        targetOrgId = orgId;
+      } else {
+        throw new UnauthorizedException('Access Denied');
+      }
+
+      if (!targetOrgId) {
+        throw new BadRequestException('Invalid organization ');
+      }
+      return await this.usersRepository.getAllOrgUsersList(targetOrgId);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getAllOrgUsersCount(organization: IOrganization, orgId?: string) {
+    try {
+      let targetOrgId: string | undefined;
+      if (organization.role === UserRole.ORGANIZATION) {
+        targetOrgId = organization.org_id;
+      } else if (organization.role === UserRole.ADMIN) {
+        targetOrgId = orgId;
+      } else {
+        throw new UnauthorizedException('Access Denied');
+      }
+
+      if (!targetOrgId) {
+        throw new BadRequestException('Invalid organization ');
+      }
+      return await this.usersRepository.getAllOrgUsersCount(targetOrgId);
     } catch (err) {
       throw err;
     }

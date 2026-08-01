@@ -1,19 +1,34 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, MinLength } from "class-validator";
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
-export class UserDTO{
+export class UserDTO {
+  @IsOptional()
+  @IsString()
+  @Length(1, 100, {
+    message: 'First name must be between 1 and 100 characters.',
+  })
+  @Matches(/^[a-zA-Z\s\-'\u00C0-\u017F]+$/, {
+    message: 'First name contains invalid characters.',
+  })
+  firstname?: string;
 
-        @IsOptional()
-        @IsString()
-        @IsNotEmpty()
-        @MaxLength(100)
-        firstname?: string;
-
-      @IsOptional()
-        @IsString()
-        @IsNotEmpty()
-        @MaxLength(100)
-        lastname?: string;
-                            
+  @IsOptional()
+  @IsString()
+  @Length(1, 100, {
+    message: 'Last name must be between 1 and 100 characters.',
+  }) //  Fixed: Changed @@Length to @Length
+  @Matches(/^[a-zA-Z\s\-'\u00C0-\u017F]+$/, {
+    message: 'Last name contains invalid characters.',
+  })
+  lastname?: string;
 }
 
 export class UpdatePasswordDto {
@@ -29,9 +44,7 @@ export class UpdatePasswordDto {
 }
 
 export class JoinOrganizationDto {
-
   @IsUUID()
   @IsNotEmpty({ message: 'organizationId is required.' })
   organizationId: string;
-
 }

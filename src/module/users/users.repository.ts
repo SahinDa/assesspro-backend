@@ -8,8 +8,8 @@ import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Auth } from '../auth/entities/auth.entity';
 import { UserStatus } from 'src/config/enum';
-import { UserDTO } from './dto/user.dto';
 import { UserOrganization } from './entities/userorganization.entity';
+import { UserDTO } from './dto/user.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -146,6 +146,15 @@ export class UsersRepository {
     }
   }
 
+  async getMyOrganizations(userId: string): Promise<UserOrganization[]> {
+    return await this.dataSource
+      .getRepository(UserOrganization)
+      .createQueryBuilder('uo')
+      .innerJoinAndSelect('uo.organization', 'org')
+      .where('uo.user_id = :userId', { userId })
+      .andWhere('uo.is_deleted = false')
+      .getMany();
+  }
   async removeAvatar(userId: string) {
     try {
       const result = await this.dataSource
@@ -156,7 +165,6 @@ export class UsersRepository {
       throw err;
     }
   }
-
   async updateProfile(userId: string, input: UserDTO): Promise<boolean> {
     try {
       const updatePayload: Partial<User> = {};
@@ -175,13 +183,22 @@ export class UsersRepository {
       );
     }
   }
-  async getMyOrganizations(userId: string): Promise<UserOrganization[]> {
+
+  async getAllOrgUsersList(targetOrgId: string) {
     return await this.dataSource
       .getRepository(UserOrganization)
       .createQueryBuilder('uo')
-      .innerJoinAndSelect('uo.organization', 'org')
-      .where('uo.user_id = :userId', { userId })
-      .andWhere('uo.is_deleted = false')
+      .where('uo.org_id = :targetOrgId', { targetOrgId })
+      .andWhere('uo.is_deleted = : status', { status: false })
       .getMany();
+  }
+
+  async getAllOrgUsersCount(targetOrgId: string) {
+    return await this.dataSource
+      .getRepository(UserOrganization)
+      .createQueryBuilder('uo')
+      .where('uo.org_id = :targetOrgId', { targetOrgId })
+      .andWhere('uo.is_deleted = : status', { status: false })
+      .getCount();
   }
 }
