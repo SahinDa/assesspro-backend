@@ -32,7 +32,7 @@ import { MailModule } from './module/mail/mail.module';
       type: 'postgres',
       url: process.env.DATABASE_URL,
       autoLoadEntities: true,
-      synchronize: true, // Auto-creates tables based on your entities
+      synchronize: false, // Auto-creates tables based on your entities
       ssl: {
         rejectUnauthorized: false, // Required for Neon/Remote Postgres
       },
