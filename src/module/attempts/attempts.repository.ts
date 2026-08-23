@@ -5,7 +5,7 @@ import { TestAttempt } from './entities/testattempt.entity';
 import { TestSet } from '../tests/entities/testset.entity';
 import { Question } from '../tests/entities/question.entity';
 import { AttemptAnswer } from './entities/attemptanswer.entity';
-import { Test } from '@nestjs/testing';
+import { Test } from '../tests/entities/test.entity';
 
 @Injectable()
 export class AttemptsRepository {
