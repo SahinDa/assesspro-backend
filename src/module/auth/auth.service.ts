@@ -274,7 +274,11 @@ export class AuthService {
         refreshToken,
         auth.refresh_token,
       );
-      if (!isTokenMatch) throw new UnauthorizedException('Invalid session');
+      if (!isTokenMatch){
+        auth.refresh_token = null;
+        await this.authRepository.saveUserAuthDatails(auth);
+        throw new UnauthorizedException('Invalid session');
+      }
 
       const payload = {
         userid: auth.user.user_id,
@@ -283,8 +287,17 @@ export class AuthService {
       const newAccessToken = await this.jwtService.signAsync(payload, {
         expiresIn: '30m',
       });
+      const newRefreshToken = await this.jwtService.signAsync(
+        { userid: auth.user.user_id },
+        { expiresIn: '1d' },
+      );
+
+      const salt = parseInt(process.env.JWT_SALT || '10');
+      auth.refresh_token = await bcrypt.hash(newRefreshToken, salt);
+      await this.authRepository.saveUserAuthDatails(auth);
       return {
         accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
         message: 'Token refreshed successfully',
       };
     } catch (err) {
