@@ -427,7 +427,7 @@ export class AuthService {
       return {
         message: 'Password has been successfully reset. You can now log in.',
         accessToken,
-        refrshToken,
+        refreshToken,
       };
     } catch (error) {
       if (error instanceof BadRequestException) {
