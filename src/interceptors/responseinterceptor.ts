@@ -28,7 +28,7 @@ export class ResponseInterceptor implements NestInterceptor {
               secure:true,
               sameSite:'lax',
               maxAge: 24 * 60 * 60 * 1000,
-              path:'/api/auth/refresh',
+              path:'/',
            })
           }
           
