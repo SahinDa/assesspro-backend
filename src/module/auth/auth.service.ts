@@ -163,7 +163,7 @@ export class AuthService {
       const otp_expires_at = new Date(Date.now() + 5 * 60 * 1000);
 
       // Save the new OTP and expiration time
-      auth.otp = await bcrypt.hash(otp, 10); // Or store plain text depending on your signup flow
+      auth.otp = otp; // Or store plain text depending on your signup flow
       auth.otp_expires_at = otp_expires_at;
 
       await this.authRepository.saveUserAuthDatails(auth);
