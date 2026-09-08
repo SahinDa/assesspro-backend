@@ -314,6 +314,8 @@ export class AuthService {
 
       auth.refresh_token = null;
 
+      await this.authRepository.saveUserAuthDatails(auth);
+
       return {
         message: 'Logout Successfully',
       };
