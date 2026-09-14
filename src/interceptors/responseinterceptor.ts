@@ -18,7 +18,7 @@ export class ResponseInterceptor implements NestInterceptor {
           response.cookie('accessToken',accessToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 30 * 60 * 1000, // 30 mins
             path:'/',
           });
@@ -26,7 +26,7 @@ export class ResponseInterceptor implements NestInterceptor {
            response.cookie('refreshToken',refreshToken,{
               httpOnly:true,
               secure:true,
-              sameSite:'lax',
+              sameSite:'none',
               maxAge: 24 * 60 * 60 * 1000,
               path:'/',
            })
