@@ -439,6 +439,7 @@ export class AuthService {
 
       return {
         message: 'Password has been successfully reset. You can now log in.',
+        user,
         accessToken,
         refreshToken,
       };
