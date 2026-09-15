@@ -10,6 +10,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { AuthProvider, UserRole, UserStatus } from 'src/config/enum';
 
 export class InputData {
@@ -23,8 +24,11 @@ export class InputData {
   })
   firstname: string;
 
-  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' && value.trim() === '' ? undefined : value,
+  )
   @IsOptional()
+  @IsString()
   @Length(1, 100, {
     message: 'Last name must be between 1 and 100 characters.',
   })
