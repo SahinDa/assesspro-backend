@@ -33,7 +33,7 @@ export class UsersRepository {
       .leftJoinAndSelect(
         'user.activeOrganization',
         'activeOrganization',
-        'activeOrganization.id = user.active_org_id AND uo.id IS NOT NULL AND activeOrganization.status = :orgStatus AND activeOrganization.is_deleted = false',
+        'activeOrganization.id = user.active_org_id AND uo.id IS NOT NULL AND activeOrganization.status = :orgStatus',
         { orgStatus: OrganizationStatus.ACTIVE },
       )
        .select([
