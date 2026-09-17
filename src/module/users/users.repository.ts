@@ -10,6 +10,7 @@ import { Auth } from '../auth/entities/auth.entity';
 import { UserStatus } from 'src/config/enum';
 import { UserOrganization } from './entities/userorganization.entity';
 import { UserDTO } from './dto/user.dto';
+import { OrganizationStatus } from 'src/config/enum';
 
 @Injectable()
 export class UsersRepository {
@@ -20,39 +21,24 @@ export class UsersRepository {
   ) {}
 
   async findByEmail(email: string) {
-    return await this.repo.findOne({
-      where: {
-        email,
-        is_deleted: false,
-      },
-      select: {
-      // All of your existing user fields preserved:
-      user_id: true,
-      firstname: true,
-      lastname: true,
-      email: true,
-      oauth_provider: true,
-      oauth_id: true,
-      email_verified: true,
-      role: true,
-      status: true,
-      profile_pic: true,
-      active_org_id: true,
-      created_at: true,
-      updated_at: true,
-
-      // Only the 3 requested fields from the organization:
-      activeOrganization: {
-        id: true,
-        name: true,
-        status: true,
-      },
-    },
-    relations: {
-      activeOrganization: true,
-    },
-      // relations: ['auth', 'userOrganizations']
-    });
+   return await this.repo
+      .createQueryBuilder('user')
+      // 1. Verify the user is actually a non-deleted member of this active_org_id
+      .leftJoin(
+        'user.userOrganizations',
+        'uo',
+        'uo.user_id = user.user_id AND uo.org_id = user.active_org_id AND uo.is_deleted = false',
+      )
+      // 2. Join the organization only if membership matched (uo.id not null) and org is ACTIVE & not deleted
+      .leftJoinAndSelect(
+        'user.activeOrganization',
+        'activeOrganization',
+        'activeOrganization.id = uo.org_id AND activeOrganization.status = :orgStatus AND activeOrganization.is_deleted = false',
+        { orgStatus: OrganizationStatus.ACTIVE },
+      )
+      .where('user.email = :email', { email })
+      .andWhere('user.is_deleted = false')
+      .getOne();
   }
 
   async createWithAuth(
