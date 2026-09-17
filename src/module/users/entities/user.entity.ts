@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { UserOrganization } from './userorganization.entity';
 import { Auth } from 'src/module/auth/entities/auth.entity';
+import { Organization } from 'src/module/organizations/entities/organization.entity';
 
 @Entity('users')
 export class User {
@@ -51,7 +52,14 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamptz', nullable: true })
   updated_at?: Date;
+  
+ @Column({ type: 'uuid', nullable: true })
+  active_org_id?: string | null;
 
+  @ManyToOne(() => Organization, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'active_org_id' })
+  activeOrganization?: Organization | null;
+  
   @OneToMany(() => UserOrganization, (userOrg) => userOrg.user)
   userOrganizations: UserOrganization[];
 
