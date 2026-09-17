@@ -7,6 +7,8 @@ import {
   UpdateDateColumn,
   OneToMany,
   OneToOne,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { UserOrganization } from './userorganization.entity';
 import { Auth } from 'src/module/auth/entities/auth.entity';
