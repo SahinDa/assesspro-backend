@@ -30,12 +30,16 @@ export class UsersRepository {
         'uo.user_id = user.user_id AND uo.org_id = user.active_org_id AND uo.is_deleted = false',
       )
       // 2. Join the organization only if membership matched (uo.id not null) and org is ACTIVE & not deleted
-      .leftJoinAndSelect(
+      .leftJoin(
         'user.activeOrganization',
         'activeOrganization',
         'activeOrganization.id = uo.org_id AND activeOrganization.status = :orgStatus AND activeOrganization.is_deleted = false',
         { orgStatus: OrganizationStatus.ACTIVE },
       )
+       .addSelect([
+        'activeOrganization.id',
+        'activeOrganization.name',
+      ])
       .where('user.email = :email', { email })
       .andWhere('user.is_deleted = false')
       .getOne();
