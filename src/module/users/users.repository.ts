@@ -25,20 +25,32 @@ export class UsersRepository {
         email,
         is_deleted: false,
       },
-      select: [
-        'user_id',
-        'firstname',
-        'lastname',
-        'email',
-        'oauth_provider',
-        'oauth_id',
-        'email_verified',
-        'role',
-        'status',
-        'profile_pic',
-        'created_at',
-        'updated_at',
-      ],
+      select: {
+      // All of your existing user fields preserved:
+      user_id: true,
+      firstname: true,
+      lastname: true,
+      email: true,
+      oauth_provider: true,
+      oauth_id: true,
+      email_verified: true,
+      role: true,
+      status: true,
+      profile_pic: true,
+      active_org_id: true,
+      created_at: true,
+      updated_at: true,
+
+      // Only the 3 requested fields from the organization:
+      activeOrganization: {
+        id: true,
+        name: true,
+        status: true,
+      },
+    },
+    relations: {
+      activeOrganization: true,
+    },
       // relations: ['auth', 'userOrganizations']
     });
   }
