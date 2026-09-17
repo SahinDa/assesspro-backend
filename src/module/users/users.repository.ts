@@ -37,10 +37,23 @@ export class UsersRepository {
         { orgStatus: OrganizationStatus.ACTIVE },
       )
        .select([
-        'user',
-        'activeOrganization.id',
-        'activeOrganization.name',
-      ])
+      'user.user_id',
+      'user.firstname',
+      'user.lastname',
+      'user.email',
+      'user.role',
+      'user.status',
+      'user.is_deleted',
+      'user.oauth_provider',
+      'user.oauth_id',
+      'user.email_verified',
+      'user.profile_pic',
+      'user.active_org_id',
+      'user.created_at',
+      'user.updated_at',
+      'activeOrganization.id',
+      'activeOrganization.name',
+    ])
       .where('user.email = :email', { email })
       .andWhere('user.is_deleted = false')
       .getOne();
