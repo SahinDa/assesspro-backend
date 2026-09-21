@@ -599,6 +599,7 @@ export class SubscriptionService {
           currentTestSetPerTest: 3,
         },
       };
+      /*
       let targetOrgId: string | undefined;
       let targetUserId: string | undefined;
 
@@ -716,7 +717,7 @@ export class SubscriptionService {
             // Currently, usage is calculated based on active records within the active subscription window.
           },
         };
-      }
+      } */
     } catch (err) {
       if (
         err instanceof ForbiddenException ||
