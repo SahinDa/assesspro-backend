@@ -581,25 +581,24 @@ export class SubscriptionService {
   ) {
     try {
       //for development purposes 
-      return {
-  "subscription_id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "organization_id": "93566d89-4002-4b8d-bd07-c791022b4b25",
-  "transaction_id": "f8e7d6c5-b4a3-2109-8765-4321fedcba98",
-  "gateway_subscription_id": "sub_1092837465",
-  "plan_name": "Pro Tier Plan",
-  "billing_cycle": 1,
-  "start_date": "2026-09-01T00:00:00.000Z",
-  "end_date": "2027-09-01T00:00:00.000Z",
-  "status": 1,
-  "features": {
-    "max_users": 50,
-    "max_tests": 100,
-    "max_sets_per_test": 10,
-    "max_questions_per_set": 100
-  },
-  "created_at": "2026-09-01T00:00:00.000Z",
-  "updated_at": "2026-09-21T18:11:00.000Z"
-}
+   return {
+        subscriptionId: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+        planName: "Pro Tier Plan",
+        status: 1, // OrgSubscriptionStatus.Active
+        startDate: "2026-09-01T00:00:00.000Z",
+        endDate: "2027-09-01T00:00:00.000Z",
+        limits: {
+          max_users: 50,
+          max_tests: 100,
+          max_sets_per_test: 10,
+          max_questions_per_set: 100,
+        },
+        usage: {
+          currentTestCount: 4,
+          currentUserCount: 12,
+          currentTestSetPerTest: 3,
+        },
+      };
       let targetOrgId: string | undefined;
       let targetUserId: string | undefined;
 
