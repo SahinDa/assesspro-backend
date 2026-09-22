@@ -126,6 +126,8 @@ export class TestService {
     organization: IOrganization,
     id?: string,
     status?: number,
+    offset:number,
+    limit:number,
   ) {
     try {
       let orgId = id;
@@ -168,18 +170,20 @@ export class TestService {
       }
 
       if (organization.role === UserRole.ADMIN) {
-        return await this.testRepository.getAllTestList(orgId, status);
+        return await this.testRepository.getAllTestList(orgId, status,offset,limit);
       } else if (organization.role === UserRole.ORGANIZATION) {
         if (status === TestStatus.DELETED) {
           throw new ForbiddenException(
             'Organizations are not authorized to view deleted records.',
           );
         }
-        return await this.testRepository.getAllTestList(orgId, status);
+        return await this.testRepository.getAllTestList(orgId, status,offset,limit);
       } else if (organization.role === UserRole.STUDENT) {
         return await this.testRepository.getAllTestList(
           orgId,
           TestStatus.ACTIVE,
+          offset,
+          limit,
         );
       }
       throw new ForbiddenException(
