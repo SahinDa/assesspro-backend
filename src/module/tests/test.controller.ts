@@ -71,7 +71,7 @@ export class TestController {
     id?: string,
     @Query('status', new ParseIntPipe({ optional: true })) status?: number,
   ) {
-    return await this.testService.getAllTestList(organization, id, status,offset,limit);
+    return await this.testService.getAllTestList(organization,offset,limit, id, status);
   }
 
   @Get(':testId')
