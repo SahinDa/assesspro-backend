@@ -124,10 +124,10 @@ export class TestService {
   }
   async getAllTestList(
     organization: IOrganization,
-    id?: string,
-    status?: number,
     offset:number,
     limit:number,
+    id?: string,
+    status?: number,
   ) {
     try {
       let orgId = id;
