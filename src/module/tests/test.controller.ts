@@ -67,8 +67,10 @@ export class TestController {
     @Query('id', new ParseUUIDPipe({ version: '4', optional: true }))
     id?: string,
     @Query('status', new ParseIntPipe({ optional: true })) status?: number,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number = 0,
+    @Query('limit', new DefaultValuePipe(12), ParseIntPipe) limit: number = 12,
   ) {
-    return await this.testService.getAllTestList(organization, id, status);
+    return await this.testService.getAllTestList(organization, id, status,offset,limit);
   }
 
   @Get(':testId')
