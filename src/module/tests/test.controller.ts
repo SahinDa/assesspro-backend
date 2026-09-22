@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
+  DefaultValuePipe,
   Patch,
   Post,
   Put,
