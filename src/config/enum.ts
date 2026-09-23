@@ -48,8 +48,8 @@ export enum TestSetStatus {
 }
 
 export enum QuestionSource {
-  MANUAL = 'Manual',
-  PDF = 'PDF',
+  MANUAL = 1,
+  PDF = 2,
 }
 
 export enum CorrectAnswer {
