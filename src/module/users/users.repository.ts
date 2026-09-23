@@ -21,42 +21,96 @@ export class UsersRepository {
   ) {}
 
   async findByEmail(email: string) {
-   return await this.repo
-      .createQueryBuilder('user')
-      // 1. Verify the user is actually a non-deleted member of this active_org_id
-      .leftJoin(
-        'user.userOrganizations',
-        'uo',
-        'uo.user_id = user.user_id AND uo.org_id = user.active_org_id AND uo.is_deleted = false',
-      )
-      // 2. Join the organization only if membership matched (uo.id not null) and org is ACTIVE & not deleted
-      .leftJoinAndSelect(
-        'user.activeOrganization',
-        'activeOrganization',
-        'activeOrganization.id = user.active_org_id AND uo.id IS NOT NULL AND activeOrganization.status = :orgStatus',
-        { orgStatus: OrganizationStatus.ACTIVE },
-      )
-       .select([
-      'user.user_id',
-      'user.firstname',
-      'user.lastname',
-      'user.email',
-      'user.role',
-      'user.status',
-      'user.is_deleted',
-      'user.oauth_provider',
-      'user.oauth_id',
-      'user.email_verified',
-      'user.profile_pic',
-      'user.active_org_id',
-      'user.created_at',
-      'user.updated_at',
-      'activeOrganization.id',
-      'activeOrganization.name',
-    ])
-      .where('user.email = :email', { email })
-      .andWhere('user.is_deleted = false')
+    const user = await this.repo.findOne({
+    where: { email, is_deleted: false },
+    select: [
+      'user_id',
+      'firstname',
+      'lastname',
+      'email',
+      'role',
+      'status',
+      'is_deleted',
+      'oauth_provider',
+      'oauth_id',
+      'email_verified',
+      'profile_pic',
+      'active_org_id',
+      'created_at',
+      'updated_at',
+    ],
+  });
+
+  if (!user) return null;
+  if (user.role === UserStatus.ADMIN) {
+    return {
+      ...user,
+      org_id: null,
+      org_name: null,
+      org_status:null,
+      activeOrganization: null,
+    };
+  }
+
+    if (user.role === UserStatus.ORGANIZATION){
+      const userOrg = await this.dataSource
+      .getRepository(UserOrganization)
+      .createQueryBuilder('uo')
+      .innerJoinAndSelect('uo.organization', 'org')
+      .where('uo.user_id = :userId', { userId: user.user_id })
+      .andWhere('uo.is_deleted = false')
+      .andWhere('org.is_deleted = false')
+      .andWhere('org.status = :status', { status: OrganizationStatus.ACTIVE })
       .getOne();
+
+      return {
+      ...user,
+      org_id: userOrg?.org_id ?? null,
+      org_name: userOrg?.organization?.name ?? null,
+      org_status:OrganizationStatus.ACTIVE,  
+      activeOrganization: null,
+    };
+    }
+
+    if (user.role === UserStatus.STUDENT){
+      let studentOrg: { id: string; name: string } | null = null;
+
+    if (user.active_org_id) {
+      const verifiedMembership = await this.dataSource
+        .getRepository(UserOrganization)
+        .createQueryBuilder('uo')
+        .innerJoinAndSelect('uo.organization', 'org')
+        .where('uo.user_id = :userId', { userId: user.user_id })
+        .andWhere('uo.org_id = :orgId', { orgId: user.active_org_id })
+        .andWhere('uo.is_deleted = false')
+        .andWhere('org.is_deleted = false')
+        .andWhere('org.status = :status', { status: OrganizationStatus.ACTIVE })
+        .getOne();
+
+      if (verifiedMembership?.organization) {
+        studentOrg = {
+          id: verifiedMembership.organization.id,
+          name: verifiedMembership.organization.name,
+        };
+      }
+    }
+
+    return {
+      ...user,
+      org_id: null,
+      org_name: null,
+      org_status:null,
+      activeOrganization: studentOrg,
+    };
+    }
+  return {
+    ...user,
+    org_id: null,
+    org_name: null,
+    org_status:null,
+    activeOrganization: null,
+  };
+   
   }
 
   async createWithAuth(
