@@ -59,7 +59,6 @@ export class UsersRepository {
       .innerJoinAndSelect('uo.organization', 'org')
       .where('uo.user_id = :userId', { userId: user.user_id })
       .andWhere('uo.is_deleted = false')
-      .andWhere('org.is_deleted = false')
       .andWhere('org.status = :status', { status: OrganizationStatus.ACTIVE })
       .getOne();
 
@@ -83,7 +82,6 @@ export class UsersRepository {
         .where('uo.user_id = :userId', { userId: user.user_id })
         .andWhere('uo.org_id = :orgId', { orgId: user.active_org_id })
         .andWhere('uo.is_deleted = false')
-        .andWhere('org.is_deleted = false')
         .andWhere('org.status = :status', { status: OrganizationStatus.ACTIVE })
         .getOne();
 
