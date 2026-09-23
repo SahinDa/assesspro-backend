@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Auth } from '../auth/entities/auth.entity';
-import { UserStatus } from 'src/config/enum';
+import { UserStatus, UserRole } from 'src/config/enum';
 import { UserOrganization } from './entities/userorganization.entity';
 import { UserDTO } from './dto/user.dto';
 import { OrganizationStatus } from 'src/config/enum';
@@ -42,7 +42,7 @@ export class UsersRepository {
   });
 
   if (!user) return null;
-  if (user.role === UserStatus.ADMIN) {
+  if (user.role === UserRole.ADMIN) {
     return {
       ...user,
       org_id: null,
@@ -52,7 +52,7 @@ export class UsersRepository {
     };
   }
 
-    if (user.role === UserStatus.ORGANIZATION){
+    if (user.role === UserRole.ORGANIZATION){
       const userOrg = await this.dataSource
       .getRepository(UserOrganization)
       .createQueryBuilder('uo')
@@ -72,7 +72,7 @@ export class UsersRepository {
     };
     }
 
-    if (user.role === UserStatus.STUDENT){
+    if (user.role === UserRole.STUDENT){
       let studentOrg: { id: string; name: string } | null = null;
 
     if (user.active_org_id) {
