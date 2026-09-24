@@ -148,13 +148,13 @@ export class TestSetRepository {
     }
   }
 
-  async getAllTestSetCount(testId: string, status: number) {
+  async getAllTestSetCount(testId: string,  statusList: number[]) {
     try {
       const totalTests = await this.dataSource
         .getRepository(TestSet)
         .createQueryBuilder('testset')
         .where('testset.test_id =:testId', { testId })
-        .andWhere('testset.status =:status', { status })
+        .andWhere('testset.status IN (:...statusList)', { statusList })
         .getCount();
 
       return { count: totalTests };
@@ -163,7 +163,7 @@ export class TestSetRepository {
     }
   }
 
-  async getAllTestSetList(testId: string, status: number,offset:number,limit:number) {
+  async getAllTestSetList(testId: string,  statusList: number[],offset:number,limit:number) {
     try {
       const result = await this.dataSource
         .getRepository(TestSet)
@@ -184,7 +184,8 @@ export class TestSetRepository {
           'testset.updated_at',
         ])
         .where('testset.test_id =:testId', { testId })
-        .andWhere('testset.status =:status', { status })
+        .andWhere('testset.status IN (:...statusList)', { statusList })
+        .orderBy('testset.set_number', 'ASC')
         .skip(offset)
         .take(limit)
         .getMany();
