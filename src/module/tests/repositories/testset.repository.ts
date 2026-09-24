@@ -163,7 +163,7 @@ export class TestSetRepository {
     }
   }
 
-  async getAllTestSetList(testId: string, status: number) {
+  async getAllTestSetList(testId: string, status: number,offset:number,limit:number) {
     try {
       const result = await this.dataSource
         .getRepository(TestSet)
@@ -185,6 +185,8 @@ export class TestSetRepository {
         ])
         .where('testset.test_id =:testId', { testId })
         .andWhere('testset.status =:status', { status })
+        .skip(offset)
+        .take(limit)
         .getMany();
 
       return result;
