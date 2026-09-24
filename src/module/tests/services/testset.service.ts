@@ -322,6 +322,8 @@ export class TestSetService {
   async getAllTestSetList(
     organization: IOrganization,
     testId: string,
+    offset:number,
+    limit:number,
     org_Id?: string,
     status?: number,
   ) {
@@ -370,6 +372,8 @@ export class TestSetService {
         return await this.testSetRepository.getAllTestSetList(
           testId,
           TestSetStatus.ACTIVE,
+          offset,
+          limit,
         );
       }
 
@@ -384,14 +388,14 @@ export class TestSetService {
       }
 
       if (organization.role === UserRole.ADMIN) {
-        return await this.testSetRepository.getAllTestSetList(testId, status);
+        return await this.testSetRepository.getAllTestSetList(testId, status,offset,limit);
       } else if (organization.role === UserRole.ORGANIZATION) {
         if (status === TestSetStatus.DELETED) {
           throw new ForbiddenException(
             'Organizations are not authorized to view deleted test sets records .',
           );
         }
-        return await this.testSetRepository.getAllTestSetList(testId, status);
+        return await this.testSetRepository.getAllTestSetList(testId, status,offset,limit);
       }
 
       throw new ForbiddenException(
