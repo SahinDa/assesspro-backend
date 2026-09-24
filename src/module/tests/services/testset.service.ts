@@ -284,36 +284,37 @@ export class TestSetService {
             'Access Denied: You are not an active member of this organization and cannot view its tests set count.',
           );
         }
-        return await this.testSetRepository.getAllTestSetCount(
-          testId,
-          TestSetStatus.ACTIVE,
-        );
       }
-
-      status = status !== undefined ? status : TestSetStatus.ACTIVE;
-
-      if (
-        status !== TestSetStatus.ON_HOLD &&
-        status !== TestSetStatus.ACTIVE &&
-        status !== TestSetStatus.DELETED
+      
+    if (
+        status !== undefined &&
+        ![TestSetStatus.ON_HOLD, TestSetStatus.ACTIVE, TestSetStatus.DELETED].includes(status)
       ) {
-        throw new BadRequestException('You entered an invalid status value.');
+        throw new BadRequestException('Invalid status value provided.');
       }
 
-      if (organization.role === UserRole.ADMIN) {
-        return await this.testSetRepository.getAllTestSetCount(testId, status);
+      let statusList: number[] = [];
+    if (organization.role === UserRole.STUDENT) {
+        // Students strictly get only ACTIVE testset
+        statusList = [TestSetStatus.ACTIVE];
       } else if (organization.role === UserRole.ORGANIZATION) {
         if (status === TestSetStatus.DELETED) {
-          throw new ForbiddenException(
-            'Organizations are not authorized to view deleted test set records count.',
-          );
+          throw new ForbiddenException('Organizations are not authorized to view deleted test set records count.');
         }
-        return await this.testSetRepository.getAllTestSetCount(testId, status);
+        // If specific status given (ACTIVE or ON_HOLD), filter by it; otherwise ALL (ACTIVE + ON_HOLD)
+        statusList = status !== undefined ? [status] : [TestSetStatus.ACTIVE, TestSetStatus.ON_HOLD];
+      } else if (organization.role === UserRole.ADMIN) {
+        // If specific status given (ACTIVE, ON_HOLD, DELETED), filter by it; otherwise ALL (ACTIVE + ON_HOLD + DELETED)
+        statusList =
+          status !== undefined
+            ? [status]
+            : [TestSetStatus.ACTIVE, TestSetStatus.ON_HOLD, TestSetStatus.DELETED];
+      } else {
+        throw new ForbiddenException('Your account tier does not have permission to view test set count.');
       }
-
-      throw new ForbiddenException(
-        'Your account tier does not have permission to view test set count.',
-      );
+      
+    return await this.testSetRepository.getAllTestSetCount(testId, statusList);
+      
     } catch (err) {
       throw err;
     }
@@ -369,38 +370,38 @@ export class TestSetService {
             'Access Denied: You are not an active member of this organization and cannot view its test sets.',
           );
         }
-        return await this.testSetRepository.getAllTestSetList(
-          testId,
-          TestSetStatus.ACTIVE,
-          offset,
-          limit,
-        );
+
       }
 
-      status = status !== undefined ? status : TestSetStatus.ACTIVE;
-
-      if (
-        status !== TestSetStatus.ON_HOLD &&
-        status !== TestSetStatus.ACTIVE &&
-        status !== TestSetStatus.DELETED
+       if (
+        status !== undefined &&
+        ![TestSetStatus.ON_HOLD, TestSetStatus.ACTIVE, TestSetStatus.DELETED].includes(status)
       ) {
-        throw new BadRequestException('You entered an invalid status value.');
+        throw new BadRequestException('Invalid status value provided.');
       }
 
-      if (organization.role === UserRole.ADMIN) {
-        return await this.testSetRepository.getAllTestSetList(testId, status,offset,limit);
+      let statusList: number[] = [];
+    if (organization.role === UserRole.STUDENT) {
+        // Students strictly get only ACTIVE testset
+        statusList = [TestSetStatus.ACTIVE];
       } else if (organization.role === UserRole.ORGANIZATION) {
         if (status === TestSetStatus.DELETED) {
-          throw new ForbiddenException(
-            'Organizations are not authorized to view deleted test sets records .',
-          );
+          throw new ForbiddenException('Organizations are not authorized to view deleted test sets records .');
         }
-        return await this.testSetRepository.getAllTestSetList(testId, status,offset,limit);
+        // If specific status given (ACTIVE or ON_HOLD), filter by it; otherwise ALL (ACTIVE + ON_HOLD)
+        statusList = status !== undefined ? [status] : [TestSetStatus.ACTIVE, TestSetStatus.ON_HOLD];
+      } else if (organization.role === UserRole.ADMIN) {
+        // If specific status given (ACTIVE, ON_HOLD, DELETED), filter by it; otherwise ALL (ACTIVE + ON_HOLD + DELETED)
+        statusList =
+          status !== undefined
+            ? [status]
+            : [TestSetStatus.ACTIVE, TestSetStatus.ON_HOLD, TestSetStatus.DELETED];
+      } else {
+        throw new ForbiddenException('Your account tier does not have permission to view test sets.');
       }
-
-      throw new ForbiddenException(
-        'Your account tier does not have permission to view test sets.',
-      );
+      
+      return await this.testSetRepository.getAllTestSetList(testId, statusList,offset,limit);
+      
     } catch (err) {
       throw err;
     }
