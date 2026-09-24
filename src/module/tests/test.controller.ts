@@ -146,6 +146,8 @@ export class TestController {
   async getAllTestSetList(
     @Param('testId', ParseUUIDPipe) testId: string,
     @Organization() organization: IOrganization,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number = 0,
+    @Query('limit', new DefaultValuePipe(12), ParseIntPipe) limit: number = 12,
     @Query('orgId', new ParseUUIDPipe({ version: '4', optional: true }))
     orgId?: string,
     @Query('status', new ParseIntPipe({ optional: true })) status?: number,
@@ -153,6 +155,8 @@ export class TestController {
     return await this.testSetService.getAllTestSetList(
       organization,
       testId,
+      offset,
+      limit,
       orgId,
       status,
     );
