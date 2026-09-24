@@ -92,7 +92,7 @@ export class TestRepository {
       throw err;
     }
   }
-  async getAllTestList(orgId: string, status: number,offset:number,limit:number) {
+  async getAllTestList(orgId: string, statusList: number[],,offset:number,limit:number) {
     try {
       const result = await this.dataSource
         .getRepository(Test)
@@ -107,7 +107,7 @@ export class TestRepository {
           'test.updated_at',
         ])
         .where('test.owner_id =:orgId', { orgId })
-        .andWhere('test.status =:status', { status })
+        .andWhere('test.status IN (:...statusList)', { statusList })
         .orderBy('test.created_at', 'DESC')
         .skip(offset)
         .take(limit)
