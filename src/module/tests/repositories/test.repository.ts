@@ -92,7 +92,7 @@ export class TestRepository {
       throw err;
     }
   }
-  async getAllTestList(orgId: string, statusList: number[],,offset:number,limit:number) {
+  async getAllTestList(orgId: string, statusList: number[],offset:number,limit:number) {
     try {
       const result = await this.dataSource
         .getRepository(Test)
