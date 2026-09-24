@@ -118,13 +118,13 @@ export class TestRepository {
       throw err;
     }
   }
-  async getAllTestCount(orgId: string, status: number) {
+  async getAllTestCount(orgId: string, statusList: number[]) {
     try {
       const totalTests = await this.dataSource
         .getRepository(Test)
         .createQueryBuilder('test')
         .where('test.owner_id =:orgId', { orgId })
-        .andWhere('test.status =:status', { status })
+        .andWhere('test.status IN (:...statusList)', { statusList })
         .getCount();
 
       return { count: totalTests };
