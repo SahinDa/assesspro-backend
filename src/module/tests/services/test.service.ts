@@ -159,36 +159,35 @@ export class TestService {
         }
       }
 
-      status = status !== undefined ? status : TestStatus.ACTIVE;
-
-      if (
-        status !== TestStatus.ON_HOLD &&
-        status !== TestStatus.ACTIVE &&
-        status !== TestStatus.DELETED
+     if (
+        status !== undefined &&
+        ![TestStatus.ON_HOLD, TestStatus.ACTIVE, TestStatus.DELETED].includes(status)
       ) {
-        throw new BadRequestException('You entered an invalid status value.');
+        throw new BadRequestException('Invalid status value provided.');
       }
-
-      if (organization.role === UserRole.ADMIN) {
-        return await this.testRepository.getAllTestList(orgId, status,offset,limit);
+     let statusList: number[] = [];
+      
+     if (organization.role === UserRole.STUDENT) {
+        // Students strictly get only ACTIVE tests
+        statusList = [TestStatus.ACTIVE];
       } else if (organization.role === UserRole.ORGANIZATION) {
         if (status === TestStatus.DELETED) {
-          throw new ForbiddenException(
-            'Organizations are not authorized to view deleted records.',
-          );
+          throw new ForbiddenException('Organizations are not authorized to view deleted records.');
         }
-        return await this.testRepository.getAllTestList(orgId, status,offset,limit);
-      } else if (organization.role === UserRole.STUDENT) {
-        return await this.testRepository.getAllTestList(
-          orgId,
-          TestStatus.ACTIVE,
-          offset,
-          limit,
-        );
+        // If specific status given (ACTIVE or ON_HOLD), filter by it; otherwise ALL (ACTIVE + ON_HOLD)
+        statusList = status !== undefined ? [status] : [TestStatus.ACTIVE, TestStatus.ON_HOLD];
+      } else if (organization.role === UserRole.ADMIN) {
+        // If specific status given (ACTIVE, ON_HOLD, DELETED), filter by it; otherwise ALL (ACTIVE + ON_HOLD + DELETED)
+        statusList =
+          status !== undefined
+            ? [status]
+            : [TestStatus.ACTIVE, TestStatus.ON_HOLD, TestStatus.DELETED];
+      } else {
+        throw new ForbiddenException('Your account role does not have permission to view tests.');
       }
-      throw new ForbiddenException(
-        'Your account tier does not have permission to view these lists.',
-      );
+
+      return await this.testRepository.getAllTestList(orgId, statusList, offset, limit);
+    
     } catch (err) {
       throw err;
     }
