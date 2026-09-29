@@ -456,9 +456,12 @@ export class TestSetService {
           'Access Denied: This test configuration is currently inactive or suspended.',
         );
       }
-
+     const canViewAnswers = 
+         organization.role === UserRole.ADMIN || 
+         organization.role === UserRole.ORGANIZATION;
+      
       const testSetDetails =
-        await this.testSetRepository.getTestSetDetails(testSetId);
+        await this.testSetRepository.getTestSetDetails(testSetId , canViewAnswers);
 
       if (!testSetDetails) {
         throw new NotFoundException(
