@@ -134,11 +134,26 @@ export class TestSetRepository {
     }
   }
 
-  async deleteTestSet(testSetId: string) {
+  async deleteTestSet(testSetId: string,testId:string) {
     try {
-      return await this.dataSource
-        .getRepository(TestSet)
-        .update({ set_id: testSetId }, { status: TestSetStatus.DELETED });
+      return await this.dataSource.transaction(async (manager) => {
+      // 1. Soft-delete the test set
+      const updateResult = await manager.update(
+        TestSet,
+        { set_id: testSetId },
+        { status: TestSetStatus.DELETED },
+      );
+
+      // 2. Decrement the parent Test total_set count directly
+      await manager.decrement(
+        Test,
+        { test_id: testId },
+        'total_set',
+        1,
+      );
+
+      return updateResult;
+    });
     } catch (error) {
       console.error(
         `Database failure while soft-deleting testSetId: ${testSetId}`,
