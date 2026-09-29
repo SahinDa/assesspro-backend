@@ -228,7 +228,7 @@ export class TestSetService {
       }
 
       // 5. Execute Soft Delete via state update
-      await this.testSetRepository.deleteTestSet(testSetId);
+      await this.testSetRepository.deleteTestSet(testSetId,testId);
 
       return { success: true, message: 'Test set successfully deleted.' };
     } catch (err) {
