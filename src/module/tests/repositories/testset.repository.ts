@@ -213,8 +213,23 @@ export class TestSetRepository {
     }
   }
 
-  async getTestSetDetails(testSetId: string) {
+  async getTestSetDetails(testSetId: string,includeAnswer: boolean = false) {
     try {
+      const questionSelects = [
+      'question.question_id',
+      'question.set_id',
+      'question.question_text',
+      'question.option_a',
+      'question.option_b',
+      'question.option_c',
+      'question.option_d',
+      'question.source',
+      'question.created_at',
+      'question.updated_at',
+    ];
+      if (includeAnswer) {
+      questionSelects.push('question.correct_answer');
+    }
       const result = await this.dataSource
         .getRepository(TestSet)
         .createQueryBuilder('testset')
@@ -234,18 +249,7 @@ export class TestSetRepository {
           'testset.updated_at',
         ])
         .leftJoin('testset.questions', 'question')
-        .addSelect([
-          'question.question_id',
-          'question.set_id',
-          'question.question_text',
-          'question.option_a',
-          'question.option_b',
-          'question.option_c',
-          'question.option_d',
-          'question.source',
-          'question.created_at',
-          'question.updated_at',
-        ])
+        .addSelect(questionSelects)
         .where('testset.set_id = :testSetId', { testSetId })
         .getOne();
 
