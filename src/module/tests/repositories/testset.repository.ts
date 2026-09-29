@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateTestSetDto, UpdateTestSetDto } from '../dto/testset.dto';
 import { DataSource } from 'typeorm';
-import {  Test, TestSet } from '../entities/testset.entity';
+import { TestSet } from '../entities/testset.entity';
 import { Question } from '../entities/question.entity';
 import { TestSetStatus } from 'src/config/enum';
 import { Test } from '../entities/test.entity';
