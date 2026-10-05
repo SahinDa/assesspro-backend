@@ -11,6 +11,7 @@ import { User } from '../users/entities/user.entity';
 import { DataSource } from 'typeorm';
 import { UpdateOrgStatusDto } from './dto/Organization.dto';
 import { JoinRequest } from './entities/join-request.entity';
+import { IsNull } from 'typeorm';
 
 @Injectable()
 export class OrganizationsRepository {
@@ -347,14 +348,15 @@ export class OrganizationsRepository {
       });
 
       await manager.save(userOrgLink);
-      await manager
-      .createQueryBuilder()
-      .update(User)
-      .set({ active_org_id: requestData.organization_id })
-      .where('user_id = :userId AND active_org_id IS NULL', {
-        userId: requestData.user_id,
-      })
-      .execute();
+      await manager.getRepository(User).update(
+      {
+         user_id: requestData.user_id,
+         active_org_id: IsNull(),
+       },
+       {
+         active_org_id: requestData.organization_id,
+        },
+       );
       
       return true;
     });
