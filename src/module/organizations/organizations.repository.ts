@@ -347,6 +347,15 @@ export class OrganizationsRepository {
       });
 
       await manager.save(userOrgLink);
+      await manager
+      .createQueryBuilder()
+      .update(User)
+      .set({ active_org_id: requestData.organization_id })
+      .where('user_id = :userId AND active_org_id IS NULL', {
+        userId: requestData.user_id,
+      })
+      .execute();
+      
       return true;
     });
   }
