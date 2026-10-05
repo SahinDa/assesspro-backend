@@ -354,6 +354,7 @@ export class OrganizationsRepository {
          active_org_id: IsNull(),
        },
        {
+         activeOrganization: { id: requestData.organization_id } as any,
          active_org_id: requestData.organization_id,
         },
        );
