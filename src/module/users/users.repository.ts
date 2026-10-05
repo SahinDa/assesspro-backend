@@ -72,10 +72,10 @@ export class UsersRepository {
     }
 
     if (user.role === UserRole.STUDENT){
-      let studentOrg: { id: string; name: string } | null = null;
+      let verifiedMembership: UserOrganization | null = null;
 
     if (user.active_org_id) {
-      const verifiedMembership = await this.dataSource
+       verifiedMembership = await this.dataSource
         .getRepository(UserOrganization)
         .createQueryBuilder('uo')
         .innerJoinAndSelect('uo.organization', 'org')
@@ -84,21 +84,24 @@ export class UsersRepository {
         .andWhere('uo.is_deleted = false')
         .andWhere('org.status = :status', { status: OrganizationStatus.ACTIVE })
         .getOne();
-
-      if (verifiedMembership?.organization) {
-        studentOrg = {
-          id: verifiedMembership.organization.id,
-          name: verifiedMembership.organization.name,
-        };
-      }
     }
+
+    const org = verifiedMembership?.organization;
+    const resolvedOrgId = org?.id ?? user.active_org_id ?? null;
+    const resolvedOrgName = org?.name ?? null;
 
     return {
       ...user,
-      org_id: null,
-      org_name: null,
-      org_status:null,
-      activeOrganization: studentOrg,
+      active_org_id: resolvedOrgId,
+      org_id: resolvedOrgId,
+      org_name: resolvedOrgName,
+      org_status: org ? OrganizationStatus.ACTIVE : null,
+      activeOrganization: org
+        ? {
+            id: org.id,
+            name: org.name,
+          }
+        : null,
     };
     }
   return {
@@ -108,8 +111,8 @@ export class UsersRepository {
     org_status:null,
     activeOrganization: null,
   };
-   
   }
+   
 
   async createWithAuth(
     userData: Partial<User>,
