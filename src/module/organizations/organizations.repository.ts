@@ -280,7 +280,9 @@ export class OrganizationsRepository {
           'jr.created_at AS "requestedAt"',
         ])
         .where('jr.organization_id = :orgId', { orgId })
-        .andWhere('jr.status = :status', { status: JoinRequestStatus.PENDING });
+        .andWhere('jr.status = :status', { status: JoinRequestStatus.PENDING })
+        .orderBy('jr.created_at', 'DESC')
+        .getRawMany();
 
       return organizationList;
     } catch (err) {
