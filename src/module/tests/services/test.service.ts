@@ -148,7 +148,7 @@ export class TestService {
 
       if (organization.role === UserRole.STUDENT) {
         const partOfOrganization =
-          await this.organizationsservice.checkExistingRequest(
+          await this.organizationsservice.isValidUserOrganization(
             organization.user_id,
             orgId,
           );
@@ -216,7 +216,7 @@ export class TestService {
 
       if (organization.role === UserRole.STUDENT) {
         const partOfOrganization =
-          await this.organizationsservice.checkExistingRequest(
+          await this.organizationsservice.isValidUserOrganization(
             organization.user_id,
             orgId,
           );
@@ -283,7 +283,7 @@ export class TestService {
 
       if (organization.role === UserRole.STUDENT) {
         const partOfOrganization =
-          await this.organizationsservice.checkExistingRequest(
+          await this.organizationsservice.isValidUserOrganization(
             organization.user_id,
             orgId,
           );
