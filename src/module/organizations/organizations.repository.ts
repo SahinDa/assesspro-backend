@@ -399,7 +399,7 @@ export class OrganizationsRepository {
     return await requestRepo.save(newRequest);
   }
 
-  async isValidUserOrganization(userId: string, OrgId: string):Promise<boolean> {
+  async isValidUserOrganization(userId: string, orgId: string):Promise<boolean> {
       if (!userId || !orgId) {
        return false;
       }
@@ -407,7 +407,7 @@ export class OrganizationsRepository {
         .getRepository(UserOrganization)
         .createQueryBuilder('uo')
         .where('uo.user_id =:userId', { userId })
-        .andWhere('uo.org_id =:OrgId', { OrgId })
+        .andWhere('uo.org_id =:orgId', { orgId })
         .andWhere('uo.is_deleted = :isDeleted', { isDeleted: false })
         .getExists();
   }
