@@ -134,12 +134,20 @@ export class AttemptsService {
         score: 0.0, // Clean numeric default base
       });
 
+      const testsetDetails =  await this.testsetservices.getTestSet(
+        input.test_id,
+        input.testset_id,
+        organization,
+        input.orgId,
+      )
+
       // 6. Return response layout
       return {
         attempt_id: savedAttempt.attempt_id,
         start_time: savedAttempt.start_time,
         end_time: savedAttempt.end_time,
         timer_minutes: testSet.timer_minutes,
+        testsetDetails,
         message: 'Test attempt initialized successfully.',
       };
     } catch (err) {
