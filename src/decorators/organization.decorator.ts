@@ -18,9 +18,9 @@ export const Organization = createParamDecorator(
       profile_pic: user.profile_pic,
       created_at: user.created_at,
       updated_at: user.updated_at,
-      org_id: org.id,
-      org_name: org.name,
-      org_status: org.status,
+      org_id: org?.id ?? null,
+      org_name: org?.name ?? null,
+      org_status: org?.status ?? null,
     };
     return organization;
   },
