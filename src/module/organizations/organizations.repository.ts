@@ -348,16 +348,13 @@ export class OrganizationsRepository {
       });
 
       await manager.save(userOrgLink);
-      await manager.getRepository(User).update(
-      {
-         user_id: requestData.user_id,
-         active_org_id: IsNull(),
-       },
-       {
-         activeOrganization: { id: requestData.organization_id } as any,
-         active_org_id: requestData.organization_id,
-        },
-       );
+      await manager
+      .createQueryBuilder()
+      .update(User)
+      .set({ active_org_id: requestData.organization_id })
+      .where('user_id = :userId', { userId: requestData.user_id })
+      .andWhere('active_org_id IS NULL')
+      .execute();
       
       return true;
     });
