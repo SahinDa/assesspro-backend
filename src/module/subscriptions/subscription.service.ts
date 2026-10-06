@@ -20,6 +20,7 @@ import {
   UserRole,
   UserSubscriptionStatus,
   OrganizationSubscriptionFeatureKey,
+  PlatformSubscriptionFeatureKey,
 } from 'src/config/enum';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import {
@@ -595,7 +596,7 @@ export class SubscriptionService {
           limits: {
             [OrganizationSubscriptionFeatureKey.MAX_TEST_SETS]: 50,
             [OrganizationSubscriptionFeatureKey.MAX_REATTEMPTS]: 5,
-          },
+          }as Record<string, number | boolean>,,
           usage: {
             totalUniqueSetsAttempted: 1,
             reattemptsCount: 0,
@@ -609,12 +610,12 @@ export class SubscriptionService {
         status: 1, // OrgSubscriptionStatus.Active
         startDate: "2026-09-01T00:00:00.000Z",
         endDate: "2027-09-01T00:00:00.000Z",
-        limits: {
-          max_users: 50,
-          max_tests: 100,
-          max_sets_per_test: 10,
-          max_questions_per_set: 100,
-        },
+       limits: {
+          [PlatformSubscriptionFeatureKey.MAX_USERS]: 50,
+          [PlatformSubscriptionFeatureKey.MAX_TESTS]: 100,
+          [PlatformSubscriptionFeatureKey.MAX_SETS_PER_TEST]: 10,
+          [PlatformSubscriptionFeatureKey.MAX_QUESTIONS_PER_SET]: 100,
+        } as Record<string, number | boolean>,
         usage: {
           currentTestCount: 4,
           currentUserCount: 12,
