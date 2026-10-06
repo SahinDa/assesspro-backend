@@ -587,10 +587,9 @@ export class SubscriptionService {
         return {
           subscriptionId: 'b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e',
           userId: organization.user_id,
-          organizationId: targetId || organization.active_org_id || organization.org_id,
+          organizationId: targetId || organization?.org_id,
           planName: 'Student Pro Plan',
-          billingCycle: StudentBillingCycle.MONTHLY,
-          status: UserSubscriptionStatus.Active,
+          status: 1,
           startDate: '2026-09-01T00:00:00.000Z',
           endDate: '2027-09-01T00:00:00.000Z',
           limits: {
