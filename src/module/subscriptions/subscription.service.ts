@@ -595,7 +595,7 @@ export class SubscriptionService {
           limits: {
             [OrganizationSubscriptionFeatureKey.MAX_TEST_SETS]: 50,
             [OrganizationSubscriptionFeatureKey.MAX_REATTEMPTS]: 5,
-          }as Record<string, number | boolean>,,
+          }as Record<string, number | boolean>,
           usage: {
             totalUniqueSetsAttempted: 1,
             reattemptsCount: 0,
