@@ -19,6 +19,7 @@ import {
   TestStatus,
   UserRole,
   UserSubscriptionStatus,
+  OrganizationSubscriptionFeatureKey,
 } from 'src/config/enum';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import {
@@ -581,6 +582,27 @@ export class SubscriptionService {
   ) {
     try {
       //for development purposes 
+      if (organization.role === UserRole.STUDENT) {
+        return {
+          subscriptionId: 'b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e',
+          userId: organization.user_id,
+          organizationId: targetId || organization.active_org_id || organization.org_id,
+          planName: 'Student Pro Plan',
+          billingCycle: StudentBillingCycle.MONTHLY,
+          status: UserSubscriptionStatus.Active,
+          startDate: '2026-09-01T00:00:00.000Z',
+          endDate: '2027-09-01T00:00:00.000Z',
+          limits: {
+            [OrganizationSubscriptionFeatureKey.MAX_TEST_SETS]: 50,
+            [OrganizationSubscriptionFeatureKey.MAX_REATTEMPTS]: 5,
+          },
+          usage: {
+            totalUniqueSetsAttempted: 1,
+            reattemptsCount: 0,
+          },
+        };
+      }
+      
    return {
         subscriptionId: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
         planName: "Pro Tier Plan",
