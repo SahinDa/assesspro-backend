@@ -7,6 +7,7 @@ import {
   ValidateNested,
   IsOptional,
   IsNumber,
+  ValidateIf,
 } from 'class-validator';
 import { AnswerOption, SubmissionType, ViolationType } from 'src/config/enum';
 
@@ -28,8 +29,9 @@ export class SingleAnswerDto {
   @IsUUID()
   question_id: string;
 
+  @ValidateIf((_, value) => value !== null)
   @IsEnum(AnswerOption)
-  selected_option: AnswerOption; // 1=A, 2=B, 3=C, 4=D, 0=Skipped
+  selected_option: AnswerOption | null; // 1=A, 2=B, 3=C, 4=D, 0=Skipped
 }
 
 export class SubmitTestDto {
