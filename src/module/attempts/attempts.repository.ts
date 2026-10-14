@@ -20,7 +20,7 @@ export class AttemptsRepository {
         .where('ta.user_id = :userId', { userId })
         .andWhere('ta.test_id = :testId', { testId })
         .andWhere('ta.set_id = :testSetId', { testSetId })
-        .andWhere('ta.end_time > :now', { now: new Date() })
+        .andWhere('ta.submitted_via IS NULL')
         .select(['ta.attempt_id'])
         .getOne();
 
