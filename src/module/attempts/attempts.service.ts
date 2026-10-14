@@ -358,6 +358,11 @@ export class AttemptsService {
         : 0;
 
       // 3. Compute fractional metrics question by question
+      let correctAnswer = 0;
+      let wrongAnswer = 0;
+      let unattemptedAnswer = 0;
+      let  totalQuestion = answerKeys.length();
+      
       for (const questionKey of answerKeys) {
         const studentSelection = allCachedAnswers[questionKey.question_id];
 
@@ -371,8 +376,10 @@ export class AttemptsService {
           if (chosenOption === questionKey.correct_answer) {
             isCorrectStatus = AnswerEvaluation.CORRECT;
             marksAwarded = positiveValue;
+            correctAnswer++;
           } else {
             isCorrectStatus = AnswerEvaluation.WRONG;
+            wrongAnswer++;
             const penaltyCost = positiveValue * negativeValue;
             marksAwarded = attemptMetadata.is_negative_marking
               ? -penaltyCost
@@ -400,10 +407,14 @@ export class AttemptsService {
       );
 
       await this.redis.del(mainKey);
-
+       unattemptedAnswer = totalQuestion - corretAnswer - wrongAnswer;
       return {
         success: true,
         score: calculatedFinalScore,
+        totalQuestion,
+        correctAnswer,
+        wrongAnswer,
+        unattemptedAnswer,
         submitted_via: SubmissionType[submissionMethod],
         message: 'Test completed and graded successfully.',
       };
