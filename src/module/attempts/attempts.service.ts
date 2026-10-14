@@ -362,6 +362,7 @@ export class AttemptsService {
       let wrongAnswer = 0;
       let unattemptedAnswer = 0;
       let  totalQuestion = answerKeys.length;
+      let totalMarks = totalQuestion * positiveValue;
       
       for (const questionKey of answerKeys) {
         const studentSelection = allCachedAnswers[questionKey.question_id];
@@ -412,6 +413,7 @@ export class AttemptsService {
         success: true,
         score: calculatedFinalScore,
         totalQuestion,
+        totalMarks,
         correctAnswer,
         wrongAnswer,
         unattemptedAnswer,
