@@ -361,7 +361,7 @@ export class AttemptsService {
       let correctAnswer = 0;
       let wrongAnswer = 0;
       let unattemptedAnswer = 0;
-      let  totalQuestion = answerKeys.length();
+      let  totalQuestion = answerKeys.length;
       
       for (const questionKey of answerKeys) {
         const studentSelection = allCachedAnswers[questionKey.question_id];
@@ -407,7 +407,7 @@ export class AttemptsService {
       );
 
       await this.redis.del(mainKey);
-       unattemptedAnswer = totalQuestion - corretAnswer - wrongAnswer;
+       unattemptedAnswer = totalQuestion - correctAnswer - wrongAnswer;
       return {
         success: true,
         score: calculatedFinalScore,
