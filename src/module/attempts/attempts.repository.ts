@@ -118,14 +118,14 @@ export class AttemptsRepository {
 
   async isValidAttempt(attemptId: string, userId: string) {
     try {
-      const bufferTime = new Date(Date.now() + 2 * 60 * 1000);
+      const currentTime = new Date();
       return await this.dataSource
         .getRepository(TestAttempt)
         .createQueryBuilder('ta')
         .where('ta.user_id = :userId', { userId })
         .andWhere('ta.attempt_id = :attemptId', { attemptId })
         .andWhere('ta.submitted_via IS NULL')
-        .andWhere('ta.end_time >= :bufferTime', { bufferTime })
+        .andWhere(`ta.end_time + INTERVAL '2 minutes' > :currentTime`,{ currentTime })
         .select(['ta.end_time'])
         .getOne();
     } catch (err) {
