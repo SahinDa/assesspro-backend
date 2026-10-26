@@ -117,11 +117,11 @@ export class AttemptsController {
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.STUDENT, UserRole.ADMIN, UserRole.ORGANIZATION)
   async getDetailsAboutAttempt(
-    @User() user: IAuthenticatedUser,
+    @Organization() organization: IOrganization,
     @Query('attemptId') attemptId: string,
   ) {
     return await this.attemptsservices.getSingleAttemptDetails(
-      user.user_id,
+      organization,
       attemptId,
     );
   }
