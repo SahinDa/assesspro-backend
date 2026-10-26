@@ -217,7 +217,7 @@ export class AttemptsRepository {
         'sa.is_correct_status AS is_correct_status',
         'sa.marks_awarded AS marks_awarded',
       ])
-      .where('ta.attempt_id = :attemptId, {
+      .where('ta.attempt_id = :attemptId', {
         attemptId       
       })
       .orderBy('q.question_id', 'ASC')
