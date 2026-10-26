@@ -20,6 +20,7 @@ import {
   OrganizationSubscriptionFeatureKey,
   SubmissionType,
   ViolationType,
+   UserRole,
 } from 'src/config/enum';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
