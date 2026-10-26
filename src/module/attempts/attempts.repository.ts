@@ -370,4 +370,14 @@ export class AttemptsRepository {
     .andWhere('ta.attempt_id = :attemptId', { attemptId })
     .getExists();
 }
+  async  isValidOrganizationAttempt(orgId:string,attemptId:string) : Promise<boolean> {
+  return  await this.dataSource
+        .getRepository(TestAttempt)
+        .createQueryBuilder('attempt')
+        .innerJoin(Test, 'test', 'test.test_id = attempt.test_id')
+        .where('attempt.attempt_id =:attemptId',{attemptId})
+        .andWhere('test.owner_id =:orgId',{orgId})
+        .getExists();
+  
+}
 }
