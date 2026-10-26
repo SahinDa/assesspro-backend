@@ -615,10 +615,21 @@ export class AttemptsService {
     }
   }
 
-  async getSingleAttemptDetails(userId: string, attemptId: string) {
+  async getSingleAttemptDetails(organization: IOrganization, attemptId: string) {
     try {
+        if (organization.role === UserRole.ORGANIZATION){
+          const isValidAttempt = await this.attemptsrepository.isValidOrganizationAttempt(organization.org_id,attemptId);
+            if (!isValidAttempt) {
+               throw new ForbiddenException('Invalid AttemptId or Access Denied');
+             }
+        }else if (organization.role === UserRole.STUDENT) {
+          const isValidAttempt = await this.attemptsrepository.isValidUserAttempt(organization.user_id,attemptId);
+          if (!isValidAttempt) {
+                throw new ForbiddenException('Invalid AttemptId or Access Denied');
+          }
+        }
+      
       const rawRows = await this.attemptsrepository.getAttemptDetailedReview(
-        userId,
         attemptId,
       );
 
