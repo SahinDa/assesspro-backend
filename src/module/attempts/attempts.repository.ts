@@ -362,4 +362,12 @@ export class AttemptsRepository {
       throw err;
     }
   }
+  async isValidUserAttempt(userId: string, attemptId: string): Promise<boolean> {
+  return await this.dataSource
+    .getRepository(TestAttempt)
+    .createQueryBuilder('ta')
+    .where('ta.user_id = :userId', { userId })
+    .andWhere('ta.attempt_id = :attemptId', { attemptId })
+    .getExists();
+}
 }
