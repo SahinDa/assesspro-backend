@@ -181,7 +181,6 @@ export class AttemptsRepository {
   }
 
   async getAttemptDetailedReview(
-    userId: string,
     attemptId: string,
   ): Promise<any[]> {
     return await this.dataSource
@@ -218,9 +217,8 @@ export class AttemptsRepository {
         'sa.is_correct_status AS is_correct_status',
         'sa.marks_awarded AS marks_awarded',
       ])
-      .where('ta.attempt_id = :attemptId AND ta.user_id = :userId', {
-        attemptId,
-        userId,
+      .where('ta.attempt_id = :attemptId, {
+        attemptId       
       })
       .orderBy('q.question_id', 'ASC')
       .getRawMany();
