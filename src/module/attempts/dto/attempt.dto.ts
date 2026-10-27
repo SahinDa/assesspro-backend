@@ -70,13 +70,12 @@ export class ReportViolationDto {
   @IsNotEmpty()
   orgId: string;
 }
-
 export class HistoryFilterDto {
   @IsOptional()
   @IsUUID()
-  testId?: string;
+  test_id?: string;
 
   @IsOptional()
   @IsUUID()
-  setId?: string;
+  testset_id?: string;
 }
