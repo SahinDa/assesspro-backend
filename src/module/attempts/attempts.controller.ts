@@ -135,7 +135,7 @@ export class AttemptsController {
     @Organization() organization: IOrganization,
     @Query() filter: HistoryFilterDto,
   ) {
-    return await this.attemptsservices.getUserAttemptHistory(
+    return await this.attemptsservices.getAttemptHistory(
       organization,
       filter,
     );
