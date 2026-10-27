@@ -80,6 +80,10 @@ export class HistoryFilterDto {
   @IsOptional()
   @IsUUID()
   testset_id?: string;
+
+  @IsOptional()
+  @IsUUID()
+  orgId?: string;
   
   @IsOptional()
   @Type(() => Number)
