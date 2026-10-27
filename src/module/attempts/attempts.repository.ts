@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StartAttemptDto } from './dto/attempt.dto';
+import { StartAttemptDto,HistoryFilterDto } from './dto/attempt.dto';
 import { DataSource } from 'typeorm';
 import { TestAttempt } from './entities/testattempt.entity';
 import { TestSet } from '../tests/entities/testset.entity';
