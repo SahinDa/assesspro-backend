@@ -685,15 +685,15 @@ export class AttemptsService {
       let limit: number = filter?.limit ?? 10;
       let offset : number = filter?.offset ?? 0;
       if (organization.role === UserRole.ORGANIZATION){
-          orgId = organization?.org_id;
+          orgId = organization?.org_id ?? null;
       }else if (organization.role === UserRole.STUDENT) {
-        orgId = filter?.orgId;
-        userId = organization?.user_id;
+        orgId = filter?.orgId ?? null;
+        userId = organization?.user_id ?? null;
         if(!userId){
            throw new NotFoundException('User not found');
         }
       }else if(organization.role === UserRole.ADMIN){
-        orgId = filter?.orgId;
+        orgId = filter?.orgId ?? null;
       }
       if(!orgId){
         throw new NotFoundException('Organization id is required');
