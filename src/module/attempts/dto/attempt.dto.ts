@@ -8,6 +8,8 @@ import {
   IsOptional,
   IsNumber,
   ValidateIf,
+  IsInt,
+  Min,
 } from 'class-validator';
 import { AnswerOption, SubmissionType, ViolationType } from 'src/config/enum';
 
@@ -78,4 +80,16 @@ export class HistoryFilterDto {
   @IsOptional()
   @IsUUID()
   testset_id?: string;
+  
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit: number = 10;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  offset: number = 0;
 }
