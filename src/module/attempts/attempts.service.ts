@@ -12,6 +12,7 @@ import {
   SaveProgressBulkDto,
   StartAttemptDto,
   SubmitTestDto,
+  HistoryFilterDto,
 } from './dto/attempt.dto';
 import { TestSetService } from '../tests/services/testset.service';
 import {
@@ -677,39 +678,60 @@ export class AttemptsService {
     }
   }
 
-  async getUserAttemptHistory(userId: string, limit: number, offset: number) {
+  async getAttemptHistory(organization: IOrganization,filter: HistoryFilterDto) {
     try {
+      let userId:string = null;
+      let orgId :string;
+      let limit: number = filter?.limit ?? 10;
+      let offset : number = filter?.offset ?? 0;
+      if (organization.role === UserRole.ORGANIZATION){
+          orgId = organization?.org_id;
+      }else if (organization.role === UserRole.STUDENT) {
+        orgId = filter?.orgId;
+        userId = organization?.user_id;
+        if(!userId){
+           throw new NotFoundException('User not found');
+        }
+      }else if(organization.role === UserRole.ADMIN){
+        orgId = filter?.orgId;
+      }
+      if(!orgId){
+        throw new NotFoundException('Organization id is required');
+      }
+      
       const { data, total } =
-        await this.attemptsrepository.findAttemptHistoryByUserId(
+        await this.attemptsrepository.getAttemptHistory(
+          orgId,
           userId,
-          limit,
-          offset,
+          filter,
         );
 
       const mappedData = data.map((item) => ({
-        attempt_id: item.attempt_id,
-        test_id: item.test_id,
-        test_name: item.test_name,
-        set_id: item.set_id,
-        set_name: item.set_name,
-        attempt_number: Number(item.attempt_number),
-        final_score: item.final_score,
-        submitted_via: item.submitted_via,
-        created_at: item.created_at,
+        attemptId: item.attempt_id,
+        userId : item.user_id,
+        studentName : item.student_name || 'Student',
+        testId: item.test_id,
+        testName: item.test_name,
+        setId: item.set_id,
+        setName: item.set_name,
+        attemptNumber: Number(item.attempt_number),
+        finalScore: Number(item.final_score ?? 0),
+        submittedVia: item.submitted_via,
+        startTime: item.start_time,
       }));
 
       return {
         data: mappedData,
         meta: {
           total_items: total,
-          limit: limit,
+          limit: limit ,
           offset: offset,
           has_more: total > offset + limit,
         },
       };
     } catch (err) {
       console.log(
-        `Failed to retrieve attempt history for user ${userId}:`,
+        `Failed to retrieve attempt history::`,
         err.message,
       );
       throw err;
