@@ -23,6 +23,7 @@ import {
   SaveProgressBulkDto,
   StartAttemptDto,
   SubmitTestDto,
+  HistoryFilterDto,
 } from './dto/attempt.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis'; // 1. Add this import
 import Redis from 'ioredis';
@@ -129,16 +130,14 @@ export class AttemptsController {
   // return test id and name , set id and name and attempt number
   @Get('/history')
   @HttpCode(HttpStatus.OK)
-  @Roles(UserRole.STUDENT)
+  @Roles(UserRole.STUDENT,UserRole.ORGANIZATION, UserRole.ADMIN)
   async getAttemptHistory(
-    @User() user: IAuthenticatedUser,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
-    @Query('offset', new ParseIntPipe({ optional: true })) offset: number = 0,
+    @Organization() organization: IOrganization,
+    @Query() filter: HistoryFilterDto,
   ) {
     return await this.attemptsservices.getUserAttemptHistory(
-      user.user_id,
-      limit,
-      offset,
+      organization,
+      filter,
     );
   }
 
