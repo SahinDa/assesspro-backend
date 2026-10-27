@@ -224,40 +224,61 @@ export class AttemptsRepository {
       .getRawMany();
   }
 
-  async findAttemptHistoryByUserId(
-    userId: string,
-    limit: number,
-    offset: number,
+  async getAttemptHistory(
+    orgId:string,
+    userId:string | null,
+    filter: HistoryFilterDto
   ): Promise<{ data: any[]; total: number }> {
-    const total = await this.dataSource
-      .getRepository(TestAttempt)
-      .count({ where: { user_id: userId } });
+    
+    let limit = filter?.limit ?? 10;
+    let offset = filter?.offset ?? 0;
+
+    const baseQb = this.dataSource
+    .getRepository(TestAttempt)
+    .createQueryBuilder('ta')
+    .innerJoin('tests', 't', 't.test_id = ta.test_id')
+    .innerJoin('test_sets', 'ts', 'ts.set_id = ta.set_id')
+    .where('t.owner_id = :orgId', { orgId })
+    .andWhere('ta.submitted_via IS NOT NULL');
+
+    if(filter?.test_id){
+      baseQb.andWhere('ta.test_id =:testId',{testId : filter.test_id});
+    }
+
+    if(filter?.testset_id){
+      baseQb.andWhere('ts.set_id =:testSetId',{testSetId : filter.testset_id});
+    }
+
+    if(userId){
+      baseQb.andWhere('ta.user_id = :userId', { userId });
+    }
+  
+    const total = await baseQb.getCount();
 
     if (total === 0) {
       return { data: [], total: 0 };
     }
 
-    const data = await this.dataSource
-      .getRepository(TestAttempt)
-      .createQueryBuilder('ta')
-      .innerJoin('tests', 't', 't.test_id = ta.test_id')
-      .innerJoin('test_sets', 'ts', 'ts.set_id = ta.set_id')
+    const data = await baseQb
+      .leftJoin('users', 'u', 'u.user_id = ta.user_id')
       .select([
         'ta.attempt_id AS attempt_id',
+        'ta.user_id AS user_id',
+        'u.name AS student_name',
         'ta.test_id AS test_id',
         't.name AS test_name',
         'ta.set_id AS set_id',
         'ts.name AS set_name',
-        'ta.final_score AS final_score',
+        'ta.score AS final_score',
         'ta.submitted_via AS submitted_via',
-        'ta.created_at AS created_at',
-        'ROW_NUMBER() OVER (PARTITION BY ta.test_id ORDER BY ta.created_at ASC) AS attempt_number',
+        'ta.start_time AS start_time',
+        'ta.attempt_number AS attempt_number',
       ])
-      .where('ta.user_id = :userId', { userId })
-      .orderBy('ta.created_at', 'DESC')
+      .orderBy('ta.end_time', 'DESC')
       .offset(offset)
       .limit(limit)
       .getRawMany();
+    
 
     return { data, total };
   }
