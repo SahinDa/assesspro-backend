@@ -680,8 +680,8 @@ export class AttemptsService {
 
   async getAttemptHistory(organization: IOrganization,filter: HistoryFilterDto) {
     try {
-      let userId:string = null;
-      let orgId :string;
+      let userId:string | null = null;
+      let orgId :string | null = null;
       let limit: number = filter?.limit ?? 10;
       let offset : number = filter?.offset ?? 0;
       if (organization.role === UserRole.ORGANIZATION){
