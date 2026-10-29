@@ -645,10 +645,10 @@ export class AttemptsService {
         question_id: row.question_id,
         question_text: row.question_text,
         options: {
-          option_1: row.option_1,
-          option_2: row.option_2,
-          option_3: row.option_3,
-          option_4: row.option_4,
+          option_a: row.option_a,
+          option_b: row.option_b,
+          option_c: row.option_c,
+          option_d: row.option_d,
         },
         correct_answer: Number(row.correct_answer),
         selected_option:
