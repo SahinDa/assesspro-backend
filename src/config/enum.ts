@@ -272,6 +272,13 @@ export enum PlatformSubscriptionFeatureKey {
   MAX_QUESTIONS_PER_SET = 'max_questions_per_set',
 }
 
+export enum AttemptSortBy {
+  LATEST = 'latest',
+  OLDEST = 'oldest',
+  TOP_SCORE = 'top_score',
+  LOWEST_SCORE = 'lowest_score',
+}
+
 export enum OrganizationSubscriptionFeatureKey {
   MAX_TEST_SETS = 'max_test_sets',
   MAX_REATTEMPTS = 'max_reattempts',
