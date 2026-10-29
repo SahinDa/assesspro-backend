@@ -200,9 +200,9 @@ export class AttemptsRepository {
         't.name AS test_name',
         'ta.set_id AS set_id',
         'ts.name AS set_name',
-        'ta.final_score AS final_score',
+        'ta.score AS final_score',
         'ta.submitted_via AS submitted_via',
-        'ta.created_at AS completed_at',
+        'ta.end_time AS completed_at',
 
         // Question context fields
         'q.question_id AS question_id',
