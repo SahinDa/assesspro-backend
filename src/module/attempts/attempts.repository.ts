@@ -206,11 +206,11 @@ export class AttemptsRepository {
 
         // Question context fields
         'q.question_id AS question_id',
-        'q.text AS question_text',
-        'q.option_1 AS option_1',
-        'q.option_2 AS option_2',
-        'q.option_3 AS option_3',
-        'q.option_4 AS option_4',
+        'q.question_text AS question_text',
+        'q.option_a AS option_a',
+        'q.option_b AS option_b',
+        'q.option_c AS option_c',
+        'q.option_d AS option_d',
         'q.correct_answer AS correct_answer',
 
         // Student result properties (evaluates to null if skipped)
