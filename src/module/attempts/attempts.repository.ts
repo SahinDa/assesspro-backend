@@ -191,9 +191,9 @@ export class AttemptsRepository {
       .innerJoin('test_set', 'ts', 'ts.set_id = ta.set_id')
       .innerJoin('question', 'q', 'q.set_id = ta.set_id')
       .leftJoin(
-        'student_answers',
-        'sa',
-        'sa.attempt_id = ta.attempt_id AND sa.question_id = q.question_id',
+        'attempt_answers',
+        'aa',
+        'aa.attempt_id = ta.attempt_id AND aa.question_id = q.question_id',
       )
       .select([
         'ta.test_id AS test_id',
@@ -214,9 +214,9 @@ export class AttemptsRepository {
         'q.correct_answer AS correct_answer',
 
         // Student result properties (evaluates to null if skipped)
-        'sa.selected_option AS selected_option',
-        'sa.is_correct_status AS is_correct_status',
-        'sa.marks_awarded AS marks_awarded',
+        'aa.selected_option AS selected_option',
+        'aa.is_correct_status AS is_correct_status',
+        'aa.marks_awarded AS marks_awarded',
       ])
       .where('ta.attempt_id = :attemptId', {
         attemptId       
