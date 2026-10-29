@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { StartAttemptDto,HistoryFilterDto,AttemptSortBy } from './dto/attempt.dto';
+import { StartAttemptDto,HistoryFilterDto } from './dto/attempt.dto';
 import { DataSource } from 'typeorm';
 import { TestAttempt } from './entities/testattempt.entity';
 import { TestSet } from '../tests/entities/testset.entity';
 import { Question } from '../tests/entities/question.entity';
 import { AttemptAnswer } from './entities/attemptanswer.entity';
 import { Test } from '../tests/entities/test.entity';
+import {AttemptSortBy} from 'src/config/enum';
 
 @Injectable()
 export class AttemptsRepository {
