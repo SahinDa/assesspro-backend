@@ -11,7 +11,7 @@ import {
   IsInt,
   Min,
 } from 'class-validator';
-import { AnswerOption, SubmissionType, ViolationType } from 'src/config/enum';
+import { AnswerOption, SubmissionType, ViolationType, AttemptSortBy} from 'src/config/enum';
 
 export class StartAttemptDto {
   @IsUUID()
@@ -84,6 +84,10 @@ export class HistoryFilterDto {
   @IsOptional()
   @IsUUID()
   orgId?: string;
+  
+  @IsOptional()
+  @IsEnum(AttemptSortBy)
+  sort_by?: AttemptSortBy = AttemptSortBy.LATEST;
   
   @IsOptional()
   @Type(() => Number)
