@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StartAttemptDto,HistoryFilterDto } from './dto/attempt.dto';
+import { StartAttemptDto,HistoryFilterDto,AttemptSortBy } from './dto/attempt.dto';
 import { DataSource } from 'typeorm';
 import { TestAttempt } from './entities/testattempt.entity';
 import { TestSet } from '../tests/entities/testset.entity';
@@ -232,6 +232,7 @@ export class AttemptsRepository {
     
     let limit = filter?.limit ?? 10;
     let offset = filter?.offset ?? 0;
+    const sortBy = filter?.sort_by ?? AttemptSortBy.LATEST;
 
     const baseQb = this.dataSource
     .getRepository(TestAttempt)
@@ -258,7 +259,12 @@ export class AttemptsRepository {
     if (total === 0) {
       return { data: [], total: 0 };
     }
-
+   const sortMap: Record<AttemptSortBy, { column: string; order: 'ASC' | 'DESC' }> = {
+      [AttemptSortBy.LATEST]: { column: 'ta.end_time', order: 'DESC' },
+      [AttemptSortBy.OLDEST]: { column: 'ta.end_time', order: 'ASC' },
+      [AttemptSortBy.TOP_SCORE]: { column: 'ta.score', order: 'DESC' },
+      [AttemptSortBy.LOWEST_SCORE]: { column: 'ta.score', order: 'ASC' },
+    };
     const data = await baseQb
       .leftJoin('users', 'u', 'u.user_id = ta.user_id')
       .select([
@@ -274,7 +280,8 @@ export class AttemptsRepository {
         'ta.start_time AS start_time',
         'ta.attempt_number AS attempt_number',
       ])
-      .orderBy('ta.end_time', 'DESC')
+      .orderBy(selectedSort.column, selectedSort.order)
+      .addOrderBy('ta.attempt_id', 'DESC')
       .offset(offset)
       .limit(limit)
       .getRawMany();
