@@ -187,9 +187,9 @@ export class AttemptsRepository {
     return await this.dataSource
       .getRepository(TestAttempt)
       .createQueryBuilder('ta')
-      .innerJoin('tests', 't', 't.test_id = ta.test_id')
-      .innerJoin('test_sets', 'ts', 'ts.set_id = ta.set_id')
-      .innerJoin('questions', 'q', 'q.set_id = ta.set_id')
+      .innerJoin('test', 't', 't.test_id = ta.test_id')
+      .innerJoin('test_set', 'ts', 'ts.set_id = ta.set_id')
+      .innerJoin('question', 'q', 'q.set_id = ta.set_id')
       .leftJoin(
         'student_answers',
         'sa',
