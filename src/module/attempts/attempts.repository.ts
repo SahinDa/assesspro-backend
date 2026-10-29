@@ -266,6 +266,7 @@ export class AttemptsRepository {
       [AttemptSortBy.TOP_SCORE]: { column: 'ta.score', order: 'DESC' },
       [AttemptSortBy.LOWEST_SCORE]: { column: 'ta.score', order: 'ASC' },
     };
+    const selectedSort = sortMap[sortBy] || sortMap[AttemptSortBy.LATEST];
     const data = await baseQb
       .leftJoin('users', 'u', 'u.user_id = ta.user_id')
       .select([
