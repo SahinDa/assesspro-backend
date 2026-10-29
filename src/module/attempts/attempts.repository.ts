@@ -238,8 +238,8 @@ export class AttemptsRepository {
     const baseQb = this.dataSource
     .getRepository(TestAttempt)
     .createQueryBuilder('ta')
-    .innerJoin('tests', 't', 't.test_id = ta.test_id')
-    .innerJoin('test_sets', 'ts', 'ts.set_id = ta.set_id')
+    .innerJoin('test', 't', 't.test_id = ta.test_id')
+    .innerJoin('test_set', 'ts', 'ts.set_id = ta.set_id')
     .where('t.owner_id = :orgId', { orgId })
     .andWhere('ta.submitted_via IS NOT NULL');
 
