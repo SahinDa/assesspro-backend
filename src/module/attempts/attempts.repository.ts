@@ -272,7 +272,7 @@ export class AttemptsRepository {
       .select([
         'ta.attempt_id AS attempt_id',
         'ta.user_id AS user_id',
-        "CONCAT(u.firstname, ' ', u.lastname) AS student_name",
+        "CONCAT_WS(' ', u.firstname, u.lastname) AS student_name",
         'ta.test_id AS test_id',
         't.name AS test_name',
         'ta.set_id AS set_id',
