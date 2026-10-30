@@ -6,6 +6,7 @@ import { TestSet } from '../tests/entities/testset.entity';
 import { Question } from '../tests/entities/question.entity';
 import { AttemptAnswer } from './entities/attemptanswer.entity';
 import { Test } from '../tests/entities/test.entity';
+import { User } from 'src/module/users/entities/user.entity';
 import {AttemptSortBy} from 'src/config/enum';
 
 @Injectable()
@@ -268,7 +269,7 @@ export class AttemptsRepository {
     };
     const selectedSort = sortMap[sortBy] || sortMap[AttemptSortBy.LATEST];
     const data = await baseQb
-      .leftJoin('users', 'u', 'u.user_id = ta.user_id')
+      .leftJoin(User, 'u', 'u.user_id = ta.user_id')
       .select([
         'ta.attempt_id AS attempt_id',
         'ta.user_id AS user_id',
