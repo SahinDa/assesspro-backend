@@ -101,9 +101,9 @@ export class BookmarksRepository {
   }
   async getAllOrgBookmark(
     orgId: string,
+    userId:string | null = null,
     limit:number=10,
     offset:number=0,
-    userId?:string | null = null,
   ) {
     try {
       const qb = this.dataSource
