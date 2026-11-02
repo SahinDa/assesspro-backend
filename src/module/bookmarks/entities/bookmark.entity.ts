@@ -13,8 +13,8 @@ export class Bookmark {
   @PrimaryGeneratedColumn('uuid')
   bookmark_id: string;
 
-  @Column('uuid')
-  user_id: string;
+  @Column({ type: 'uuid', nullable: true })
+  user_id?: string | null;
 
   @Column('uuid')
   org_id: string;
