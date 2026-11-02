@@ -117,6 +117,7 @@ export class BookmarksService {
           organization.org_id,
           input.limit,
           input.offset,
+          organization.user_id,
         );
       }
       if (!input.orgId) {
@@ -148,14 +149,14 @@ export class BookmarksService {
           input.limit,
           input.offset,
         );
-      } else {
+      } 
+      
         return await this.bookmarksrepository.getAllBookmark(
           input.orgId,
           organization.user_id,
           input.limit,
           input.offset,
         );
-      }
     } catch (err) {
       throw err;
     }
