@@ -15,6 +15,7 @@ import { CreateBookmarkDto } from './dto/create-bookmark.dto';
 import { RoleGuard } from 'src/guards/role.guard';
 import { Roles } from 'src/decorators/role.decorator';
 import { UserRole } from 'src/config/enum';
+import { GetBookmarksQueryDto } from './dto/get-bookmarks-query.dto';
 
 @Controller('bookmarks')
 @UseGuards(RoleGuard)
@@ -39,15 +40,11 @@ export class BookmarksController {
   @Get()
   async getAllBookmark(
     @Organization() organization: IOrganization,
-    @Query('isOrgBookmark', new ParseBoolPipe({ optional: true }))
-    isOrgBookmark: boolean = false,
-    @Query('id', new ParseUUIDPipe({ version: '4', optional: true }))
-    orgId?: string,
+    @Query() query: GetBookmarksQueryDto,
   ) {
     return await this.bookmarksservice.getAllBookmark(
       organization,
-      isOrgBookmark,
-      orgId,
+      query,
     );
   }
 }
