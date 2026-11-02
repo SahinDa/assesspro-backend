@@ -9,6 +9,7 @@ import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
 import { BookmarkType, UserRole } from 'src/config/enum';
 import { OrganizationsService } from '../organizations/organizations.service';
+import { GetBookmarksQueryDto } from './dto/get-bookmarks-query.dto';
 
 @Injectable()
 export class BookmarksService {
@@ -108,21 +109,22 @@ export class BookmarksService {
   }
   async getAllBookmark(
     organization: IOrganization,
-    isOrgBookmark?: boolean,
-    orgId?: string,
+    input : GetBookmarksQueryDto
   ) {
     try {
       if (organization.role === UserRole.ORGANIZATION) {
         return await this.bookmarksrepository.getAllOrgBookmark(
           organization.org_id,
+          input.limit,
+          input.offset,
         );
       }
-      if (!orgId) {
+      if (!input.orgId) {
         throw new BadRequestException('Valid organization id is required');
       }
 
       const isValidOrganization =
-        await this.organizationsservice.isValid(orgId);
+        await this.organizationsservice.isValid(input.orgId);
 
       if (!isValidOrganization) {
         throw new NotFoundException(
@@ -132,7 +134,7 @@ export class BookmarksService {
 
       const isValid = await this.organizationsservice.isValidUserOrganization(
         organization.user_id,
-        orgId,
+        input.orgId,
       );
       if (!isValid) {
         throw new ForbiddenException(
@@ -140,12 +142,18 @@ export class BookmarksService {
         );
       }
 
-      if (isOrgBookmark) {
-        return await this.bookmarksrepository.getAllOrgBookmark(orgId);
+      if (input.isOrgBookmark) {
+        return await this.bookmarksrepository.getAllOrgBookmark(
+          input.orgId,
+          input.limit,
+          input.offset,
+        );
       } else {
         return await this.bookmarksrepository.getAllBookmark(
-          orgId,
+          input.orgId,
           organization.user_id,
+          input.limit,
+          input.offset,
         );
       }
     } catch (err) {
