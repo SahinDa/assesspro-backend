@@ -115,9 +115,9 @@ export class BookmarksService {
       if (organization.role === UserRole.ORGANIZATION) {
         return await this.bookmarksrepository.getAllOrgBookmark(
           organization.org_id,
+          organization.user_id,
           input.limit,
           input.offset,
-          organization.user_id,
         );
       }
       if (!input.orgId) {
@@ -146,6 +146,7 @@ export class BookmarksService {
       if (input.isOrgBookmark) {
         return await this.bookmarksrepository.getAllOrgBookmark(
           input.orgId,
+          null,
           input.limit,
           input.offset,
         );
