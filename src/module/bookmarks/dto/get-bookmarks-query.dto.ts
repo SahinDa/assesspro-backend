@@ -29,5 +29,5 @@ export class GetBookmarksQueryDto {
 
   @IsOptional()
   @IsUUID('4')
-  id?: string; // Target organization ID
+  orgId?: string; // Target organization ID
 }
