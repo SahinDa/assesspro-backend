@@ -77,7 +77,12 @@ export class BookmarksRepository {
       throw err;
     }
   }
-  async getAllBookmark(orgId: string, userId: string) {
+  async getAllBookmark(
+    orgId: string,
+    userId: string,
+    limit : number = 10,
+    offset: number = 0,
+  ) {
     try {
       const [data, count] = await this.dataSource
         .getRepository(Bookmark)
@@ -85,6 +90,8 @@ export class BookmarksRepository {
         .where('bm.org_id =:orgId', { orgId })
         .andWhere('bm.user_id =:userId', { userId })
         .orderBy('bm.created_at', 'DESC')
+        .take(limit)
+        .skip(offset)
         .getManyAndCount();
 
       return { data, total: count };
@@ -92,13 +99,29 @@ export class BookmarksRepository {
       throw err;
     }
   }
-  async getAllOrgBookmark(orgId: string) {
+  async getAllOrgBookmark(
+    orgId: string,
+    limit:number=10,
+    offset:number=0,
+    userId?:string | null = null,
+  ) {
     try {
-      const [data, count] = await this.dataSource
+      const qb = this.dataSource
         .getRepository(Bookmark)
         .createQueryBuilder('bm')
         .where('bm.org_id =:orgId', { orgId })
+
+      if (userId) {
+      // Matches official null pins OR pins created by this admin/user
+      qb.andWhere('(bm.user_id IS NULL OR bm.user_id = :userId)', { userId });
+     } else {
+      // Matches official org-level pins
+      qb.andWhere('bm.user_id IS NULL');
+      }
+      const [data, count] = await qb
         .orderBy('bm.created_at', 'DESC')
+        .take(limit)
+        .skip(offset)
         .getManyAndCount();
 
       return { data, total: count };
