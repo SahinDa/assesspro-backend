@@ -6,6 +6,7 @@ import { Bookmark } from './entities/bookmark.entity';
 import { Test } from '../tests/entities/test.entity';
 import { TestStatus } from 'src/config/enum';
 import { TestSet } from '../tests/entities/testset.entity';
+import { BookmarkType } from 'src/config/enum';
 
 @Injectable()
 export class BookmarksRepository {
@@ -82,13 +83,19 @@ export class BookmarksRepository {
     userId: string,
     limit : number = 10,
     offset: number = 0,
+    itemType?: BookmarkType,
   ) {
     try {
-      const [data, count] = await this.dataSource
-        .getRepository(Bookmark)
+       const qb = this.dataSource
+         .getRepository(Bookmark)
         .createQueryBuilder('bm')
         .where('bm.org_id =:orgId', { orgId })
         .andWhere('bm.user_id =:userId', { userId })
+      
+      if (itemType) {
+        qb.andWhere('bm.item_type = :itemType', { itemType });
+      }
+      const [data, count] = await qb
         .orderBy('bm.created_at', 'DESC')
         .take(limit)
         .skip(offset)
@@ -104,6 +111,7 @@ export class BookmarksRepository {
     userId:string | null = null,
     limit:number=10,
     offset:number=0,
+    itemType?: BookmarkType,
   ) {
     try {
       const qb = this.dataSource
@@ -118,6 +126,11 @@ export class BookmarksRepository {
       // Matches official org-level pins
       qb.andWhere('bm.user_id IS NULL');
       }
+
+      if (itemType) {
+        qb.andWhere('bm.item_type = :itemType', { itemType });
+      }
+      
       const [data, count] = await qb
         .orderBy('bm.created_at', 'DESC')
         .take(limit)
