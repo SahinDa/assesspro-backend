@@ -86,22 +86,44 @@ export class BookmarksRepository {
     itemType?: BookmarkType,
   ) {
     try {
-       const qb = this.dataSource
-         .getRepository(Bookmark)
+     const qb = this.dataSource
+        .getRepository(Bookmark)
         .createQueryBuilder('bm')
-        .where('bm.org_id =:orgId', { orgId })
-        .andWhere('bm.user_id =:userId', { userId })
-      
+        .leftJoin(
+          'test',
+          't',
+          't.test_id = bm.item_id AND bm.item_type = 1',
+        )
+        .leftJoin(
+          'test_set',
+          'ts',
+          'ts.set_id = bm.item_id AND bm.item_type = 2',
+        )
+        .select([
+          'bm.bookmark_id AS bookmark_id',
+          'bm.user_id AS user_id',
+          'bm.org_id AS org_id',
+          'bm.item_id AS item_id',
+          'bm.item_type AS item_type',
+          'bm.created_at AS created_at',
+          'COALESCE(t.name, ts.name) AS title',
+          'COALESCE(t.description, ts.description) AS subtitle',
+        ])
+        .where('bm.org_id = :orgId', { orgId })
+        .andWhere('bm.user_id = :userId', { userId });
+
       if (itemType) {
         qb.andWhere('bm.item_type = :itemType', { itemType });
       }
-      const [data, count] = await qb
-        .orderBy('bm.created_at', 'DESC')
-        .take(limit)
-        .skip(offset)
-        .getManyAndCount();
 
-      return { data, total: count };
+      const total = await qb.getCount();
+      const data = await qb
+        .orderBy('bm.created_at', 'DESC')
+        .limit(limit)
+        .offset(offset)
+        .getRawMany();
+
+      return { data, total };
     } catch (err) {
       throw err;
     }
@@ -114,10 +136,30 @@ export class BookmarksRepository {
     itemType?: BookmarkType,
   ) {
     try {
-      const qb = this.dataSource
+     const qb = this.dataSource
         .getRepository(Bookmark)
         .createQueryBuilder('bm')
-        .where('bm.org_id =:orgId', { orgId })
+        .leftJoin(
+          'test',
+          't',
+          't.test_id = bm.item_id AND bm.item_type = 1',
+        )
+        .leftJoin(
+          'test_set',
+          'ts',
+          'ts.set_id = bm.item_id AND bm.item_type = 2',
+        )
+        .select([
+          'bm.bookmark_id AS bookmark_id',
+          'bm.user_id AS user_id',
+          'bm.org_id AS org_id',
+          'bm.item_id AS item_id',
+          'bm.item_type AS item_type',
+          'bm.created_at AS created_at',
+          'COALESCE(t.name, ts.name) AS title',
+          'COALESCE(t.description, ts.description) AS subtitle',
+        ])
+        .where('bm.org_id = :orgId', { orgId });
 
       if (userId) {
       // Matches official null pins OR pins created by this admin/user
@@ -131,13 +173,14 @@ export class BookmarksRepository {
         qb.andWhere('bm.item_type = :itemType', { itemType });
       }
       
-      const [data, count] = await qb
+      const total = await qb.getCount();
+      const data = await qb
         .orderBy('bm.created_at', 'DESC')
-        .take(limit)
-        .skip(offset)
-        .getManyAndCount();
+        .limit(limit)
+        .offset(offset)
+        .getRawMany();
 
-      return { data, total: count };
+      return { data, total };
     } catch (err) {
       throw err;
     }
