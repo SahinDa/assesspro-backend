@@ -7,6 +7,7 @@ import {
   IsUUID,
   Max,
   Min,
+  IsEnum,
 } from 'class-validator';
 
 export class GetBookmarksQueryDto {
