@@ -118,6 +118,7 @@ export class BookmarksService {
           organization.user_id,
           input.limit,
           input.offset,
+          input.itemType,
         );
       }
       if (!input.orgId) {
@@ -149,6 +150,7 @@ export class BookmarksService {
           null,
           input.limit,
           input.offset,
+          input.itemType,
         );
       } 
       
@@ -157,6 +159,7 @@ export class BookmarksService {
           organization.user_id,
           input.limit,
           input.offset,
+          input.itemType,
         );
     } catch (err) {
       throw err;
