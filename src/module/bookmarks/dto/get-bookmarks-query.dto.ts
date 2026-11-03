@@ -1,4 +1,5 @@
 import { Type, Transform } from 'class-transformer';
+import { BookmarkType } from 'src/config/enum';
 import {
   IsBoolean,
   IsInt,
@@ -30,4 +31,9 @@ export class GetBookmarksQueryDto {
   @IsOptional()
   @IsUUID('4')
   orgId?: string; // Target organization ID
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsEnum(BookmarkType)
+  itemType?: BookmarkType;
 }
