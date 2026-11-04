@@ -27,7 +27,7 @@ export class BookmarksController {
   async toggleBookmark(
     @Organization() organization: IOrganization,
     @Body() input: CreateBookmarkDto,
-    @Query('id', new ParseUUIDPipe({ version: '4', optional: true }))
+    @Query('orgId', new ParseUUIDPipe({ version: '4', optional: true }))
     orgId?: string,
   ) {
     return await this.bookmarksservice.toggleBookmark(
@@ -39,7 +39,7 @@ export class BookmarksController {
  @Get("/count")
  async getBookmarkCount(
    @Organization() organization: IOrganization,
-   @Query('id', new ParseUUIDPipe({ version: '4', optional: true }))
+   @Query('orgId', new ParseUUIDPipe({ version: '4', optional: true }))
     orgId?: string,
   ){
    return await this.bookmarksservice.getBookmarkCount(organization,orgId);
