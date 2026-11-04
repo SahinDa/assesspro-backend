@@ -27,7 +27,7 @@ export class GetBookmarksQueryDto {
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true || value === 1 || value === '1')
   @IsBoolean()
-  isOrgBookmark: boolean = false;
+  isOrgBookmark: boolean = false; // Fetch institute-pinned bookmarks
 
   @IsOptional()
   @IsUUID('4')
