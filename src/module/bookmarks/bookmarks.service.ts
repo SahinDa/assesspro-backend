@@ -7,7 +7,7 @@ import {
 import { BookmarksRepository } from './bookmarks.repository';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
-import { BookmarkType, UserRole } from 'src/config/enum';
+import { BookmarkType, UserRole , BookmarkTarget } from 'src/config/enum';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { GetBookmarksQueryDto } from './dto/get-bookmarks-query.dto';
 
@@ -24,8 +24,13 @@ export class BookmarksService {
   ) {
     try {
       let targetOrgId = orgId;
+      let userId : string | null = organization.user_id;
+      
       if (organization.role === UserRole.ORGANIZATION) {
         targetOrgId = organization.org_id;
+        if (input.target_type === BookmarkTarget.STUDENT) {
+          userId = null;
+        }
       }
 
       if (!targetOrgId) {
@@ -42,10 +47,14 @@ export class BookmarksService {
       }
 
       if (organization.role === UserRole.STUDENT) {
+        if (!userId) {
+         throw new BadRequestException('Valid user id is required');
+        }
         const isValid = await this.organizationsservice.isValidUserOrganization(
-          organization.user_id,
+          userId,
           targetOrgId,
         );
+        
         if (!isValid) {
           throw new ForbiddenException(
             'Access denied: You are not authorized for this organization.',
@@ -54,7 +63,7 @@ export class BookmarksService {
       }
 
       const existingBookmark = await this.bookmarksrepository.findBookmark(
-        organization.user_id,
+        userId,
         targetOrgId,
         input,
       );
@@ -66,7 +75,7 @@ export class BookmarksService {
         return {
           message: 'Bookmark removed successfully.',
         };
-      } else {
+      } 
         const isValidBookmarkId = await this.isValidBookmarkId(
           input,
           targetOrgId,
@@ -75,13 +84,14 @@ export class BookmarksService {
         if (!isValidBookmarkId) {
           throw new NotFoundException('The requested resource is unavailable.');
         }
-
+        
+        
         return await this.bookmarksrepository.saveBookmark(
           input,
-          organization.user_id,
+          userId,
           targetOrgId,
         );
-      }
+      
     } catch (err) {
       throw err;
     }
@@ -107,28 +117,52 @@ export class BookmarksService {
       throw err;
     }
   }
-  async getBookmarkCount(
-    organization: IOrganization,
-    orgId?: string,
-  ){
-    try{
-      let userId : string | null = null;
-      let resolvedOrgId: string | null = orgId ?? null;
-      if (organization.role === UserRole.ORGANIZATION) {
-        resolvedOrgId = organization.org_id;
-      }
-      if(organization.role === UserRole.STUDENT){
-        userId = organization.user_id;
-      } 
-      if(!resolvedOrgId){
-         throw new BadRequestException('Valid organization id is required');
-      }
-      return await this.bookmarksrepository.getBookmarkCount(resolvedOrgId,userId,organization.role);
-      
-    }catch(err){
-      throw err;
+async getBookmarkCount(
+  organization: IOrganization,
+  orgId?: string,
+) {
+  const userId = organization.user_id;
+  if (!userId) {
+    throw new BadRequestException('Valid user id is required');
+  }
+
+  let resolvedOrgId: string | null = orgId ?? null;
+  if (organization.role === UserRole.ORGANIZATION) {
+    resolvedOrgId = organization.org_id;
+  }
+
+  if (!resolvedOrgId) {
+    throw new BadRequestException('Valid organization id is required');
+  }
+
+  const isValidOrganization =
+    await this.organizationsservice.isValid(resolvedOrgId);
+
+  if (!isValidOrganization) {
+    throw new NotFoundException(
+      'The requested organization could not be found or is inactive.',
+    );
+  }
+
+  if (organization.role === UserRole.STUDENT) {
+    const isMember = await this.organizationsservice.isValidUserOrganization(
+      userId,
+      resolvedOrgId,
+    );
+
+    if (!isMember) {
+      throw new ForbiddenException(
+        'Access denied: You are not authorized for this organization.',
+      );
     }
   }
+
+  return await this.bookmarksrepository.getBookmarkCount(
+    resolvedOrgId,
+    userId,
+    organization.role,
+  );
+}
     
   async getAllBookmark(
     organization: IOrganization,
