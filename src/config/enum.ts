@@ -260,6 +260,11 @@ export enum BookmarkType {
   TEST = 1,
   TEST_SET = 2,
 }
+
+export enum BookmarkTarget {
+  ORGANIZATION = 1, // Org itself / Org-wide pin
+  STUDENT = 2,      // Specifically for a student
+}
 export enum SupportedCurrency {
   INR = 'INR',
   USD = 'USD',
