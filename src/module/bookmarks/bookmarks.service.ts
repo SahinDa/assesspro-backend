@@ -107,6 +107,29 @@ export class BookmarksService {
       throw err;
     }
   }
+  async getBookmarkCount(
+    organization: IOrganization,
+    orgId?: string,
+  ){
+    try{
+      let userId : string | null = null;
+      let resolvedOrgId: string | null = orgId ?? null;
+      if (organization.role === UserRole.ORGANIZATION) {
+        resolvedOrgId = organization.org_id;
+      }
+      if(organization.role === UserRole.STUDENT){
+        userId = organization.user_id;
+      } 
+      if(!resolvedOrgId){
+         throw new BadRequestException('Valid organization id is required');
+      }
+      return await this.bookmarksrepository.getBookmarkCount(resolvedOrgId,userId,organization.role);
+      
+    }catch(err){
+      throw err;
+    }
+  }
+    
   async getAllBookmark(
     organization: IOrganization,
     input : GetBookmarksQueryDto
