@@ -6,12 +6,16 @@ import { Bookmark } from './entities/bookmark.entity';
 import { Test } from '../tests/entities/test.entity';
 import { TestStatus } from 'src/config/enum';
 import { TestSet } from '../tests/entities/testset.entity';
-import { BookmarkType } from 'src/config/enum';
+import { BookmarkType,UserRole } from 'src/config/enum';
 
 @Injectable()
 export class BookmarksRepository {
   constructor(private readonly dataSource: DataSource) {}
-  async saveBookmark(input: CreateBookmarkDto, userId: string, orgId: string) {
+  async saveBookmark(
+    input: CreateBookmarkDto,
+    userId: string | null,
+    orgId: string
+  ) {
     try {
       const repo = this.dataSource.getRepository(Bookmark);
       const bookmark = repo.create({
@@ -54,12 +58,20 @@ export class BookmarksRepository {
     }
   }
 
-  async findBookmark(userId: string, orgId: string, input: CreateBookmarkDto) {
+  async findBookmark(
+    userId: string | null,
+    orgId: string,
+    input: CreateBookmarkDto) {
     try {
-      return await this.dataSource
+      const qb = this.dataSource
         .getRepository(Bookmark)
-        .createQueryBuilder('bm')
-        .where('bm.user_id =:userId', { userId })
+        .createQueryBuilder('bm');
+      if(!userId){
+        qb.where('bm.user_id IS NULL');
+      }else{
+        qb.where('bm.user_id =:userId', { userId })
+      }
+      return await qb
         .andWhere('bm.org_id =:orgId', { orgId })
         .andWhere('bm.item_id =:itemId', { itemId: input.item_id })
         .andWhere('bm.item_type =:itemType', { itemType: input.item_type })
@@ -77,6 +89,34 @@ export class BookmarksRepository {
     } catch (err) {
       throw err;
     }
+  }
+  async getBookmarkCount(
+    resolvedOrgId:string,
+    userId:string | null,
+  ){
+    try{
+      const qb = this.dataSource
+        .getRepository(Bookmark)
+        .createQueryBuilder('bm')
+        .select([
+          'COUNT(*)::int AS "allCount"',
+          'COUNT(*) FILTER (WHERE bm.item_type = 1)::int AS "testCount"',
+          'COUNT(*) FILTER (WHERE bm.item_type = 2)::int AS "testSetCount"',
+        ])
+        .where('bm.org_id = :orgId', { orgId: resolvedOrgId })
+       qb.andWhere('(bm.user_id = :userId OR bm.user_id IS NULL)', { userId });
+      
+      const result = await qb.getRawOne();
+
+      return {
+        allCount: Number(result?.allCount || 0),
+        testCount: Number(result?.testCount || 0),
+        testSetCount: Number(result?.testSetCount || 0),
+      };
+      
+    }catch(err){
+      throw err;
+    } 
   }
   async getAllBookmark(
     orgId: string,
