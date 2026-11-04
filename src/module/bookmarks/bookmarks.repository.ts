@@ -95,24 +95,25 @@ export class BookmarksRepository {
     userId:string | null,
   ){
     try{
-      const qb = this.dataSource
-        .getRepository(Bookmark)
-        .createQueryBuilder('bm')
-        .select([
-          'COUNT(*)::int AS "allCount"',
-          'COUNT(*) FILTER (WHERE bm.item_type = 1)::int AS "testCount"',
-          'COUNT(*) FILTER (WHERE bm.item_type = 2)::int AS "testSetCount"',
-        ])
-        .where('bm.org_id = :orgId', { orgId: resolvedOrgId })
-       qb.andWhere('(bm.user_id = :userId OR bm.user_id IS NULL)', { userId });
-      
-      const result = await qb.getRawOne();
+    const result = await this.dataSource
+      .getRepository(Bookmark)
+      .createQueryBuilder('bm')
+      .select([
+        'COUNT(*)::int AS "allCount"',
+        'COUNT(*) FILTER (WHERE bm.item_type = 1)::int AS "testCount"',
+        'COUNT(*) FILTER (WHERE bm.item_type = 2)::int AS "testSetCount"',
+        'COUNT(*) FILTER (WHERE bm.user_id IS NULL)::int AS "orgCount"',
+      ])
+      .where('bm.org_id = :orgId', { orgId: resolvedOrgId })
+      .andWhere('(bm.user_id = :userId OR bm.user_id IS NULL)', { userId })
+      .getRawOne();
 
-      return {
-        allCount: Number(result?.allCount || 0),
-        testCount: Number(result?.testCount || 0),
-        testSetCount: Number(result?.testSetCount || 0),
-      };
+    return {
+      allCount: Number(result?.allCount || 0),
+      testCount: Number(result?.testCount || 0),
+      testSetCount: Number(result?.testSetCount || 0),
+      orgCount: Number(result?.orgCount || 0),
+    };
       
     }catch(err){
       throw err;
