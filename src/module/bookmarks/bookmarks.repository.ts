@@ -132,12 +132,14 @@ export class BookmarksRepository {
         .leftJoin(
           'test',
           't',
-          't.test_id = bm.item_id AND bm.item_type = 1',
+          't.test_id = bm.item_id AND bm.item_type = :testType',
+          { testType: BookmarkType.TEST },
         )
         .leftJoin(
           'test_set',
           'ts',
-          'ts.set_id = bm.item_id AND bm.item_type = 2',
+           'ts.set_id = bm.item_id AND bm.item_type = :testSetType',
+          { testSetType: BookmarkType.TEST_SET },
         )
         .select([
           'bm.bookmark_id AS bookmark_id',
@@ -156,14 +158,13 @@ export class BookmarksRepository {
         qb.andWhere('bm.item_type = :itemType', { itemType });
       }
 
-      const total = await qb.getCount();
       const data = await qb
         .orderBy('bm.created_at', 'DESC')
         .limit(limit)
         .offset(offset)
         .getRawMany();
 
-      return { data, total };
+      return data;
     } catch (err) {
       throw err;
     }
@@ -182,12 +183,14 @@ export class BookmarksRepository {
         .leftJoin(
           'test',
           't',
-          't.test_id = bm.item_id AND bm.item_type = 1',
+          't.test_id = bm.item_id AND bm.item_type = :testType',
+          { testType: BookmarkType.TEST },
         )
         .leftJoin(
           'test_set',
           'ts',
-          'ts.set_id = bm.item_id AND bm.item_type = 2',
+          'ts.set_id = bm.item_id AND bm.item_type = :testSetType',
+          { testSetType: BookmarkType.TEST_SET },
         )
         .select([
           'bm.bookmark_id AS bookmark_id',
@@ -213,14 +216,13 @@ export class BookmarksRepository {
         qb.andWhere('bm.item_type = :itemType', { itemType });
       }
       
-      const total = await qb.getCount();
       const data = await qb
         .orderBy('bm.created_at', 'DESC')
         .limit(limit)
         .offset(offset)
         .getRawMany();
 
-      return { data, total };
+      return data ;
     } catch (err) {
       throw err;
     }
