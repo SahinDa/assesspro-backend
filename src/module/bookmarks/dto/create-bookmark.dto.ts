@@ -1,4 +1,4 @@
-import { IsUUID, IsInt, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsUUID, IsInt,IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import {  BookmarkTarget } from 'src/config/enum';
 
 export class CreateBookmarkDto {
