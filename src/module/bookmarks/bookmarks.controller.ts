@@ -36,7 +36,14 @@ export class BookmarksController {
       orgId,
     );
   }
-
+ @Get("/count")
+ async getBookmarkCount(
+   @Organization() organization: IOrganization,
+   @Query('id', new ParseUUIDPipe({ version: '4', optional: true }))
+    orgId?: string,
+  ){
+   return await this.bookmarksservice.getBookmarkCount(organization,orgId);
+  }
   @Get()
   async getAllBookmark(
     @Organization() organization: IOrganization,
