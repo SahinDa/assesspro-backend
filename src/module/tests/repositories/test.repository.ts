@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Test } from '../entities/test.entity';
+import { Bookmark } from './entities/bookmark.entity';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { createTestDto, updateTestDto } from '../dto/test.dto';
 import { TestStatus, BookmarkType } from 'src/config/enum';
