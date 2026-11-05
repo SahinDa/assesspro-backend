@@ -186,7 +186,7 @@ export class TestService {
         throw new ForbiddenException('Your account role does not have permission to view tests.');
       }
 
-      return await this.testRepository.getAllTestList(orgId, statusList, offset, limit);
+      return await this.testRepository.getAllTestList(orgId,organization.user_id, statusList, offset, limit);
     
     } catch (err) {
       throw err;
@@ -294,7 +294,7 @@ export class TestService {
         }
       }
 
-      const testDetails = await this.testRepository.getTest(testId, orgId);
+      const testDetails = await this.testRepository.getTest(testId, orgId,organization.user_id);
 
       if (!testDetails) {
         throw new NotFoundException(
