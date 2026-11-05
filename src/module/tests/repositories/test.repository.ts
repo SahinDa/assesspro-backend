@@ -140,7 +140,7 @@ export class TestRepository {
         .take(limit)
         .getRawMany();
 
-      return rawResults.map((item) => ({
+      return result.map((item) => ({
       test_id: item.test_id,
       name: item.name,
       description: item.description,
