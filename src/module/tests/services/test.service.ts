@@ -294,7 +294,7 @@ export class TestService {
         }
       }
 
-      const testDetails = await this.testRepository.getTest(testId, orgId,organization.user_id);
+      const testDetails = await this.testRepository.getTest(testId, orgId);
 
       if (!testDetails) {
         throw new NotFoundException(
