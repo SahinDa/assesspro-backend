@@ -170,7 +170,7 @@ export class TestRepository {
       throw err;
     }
   }
-  async getTest(testId: string, orgId: string,userId:string) {
+  async getTest(testId: string, orgId: string) {
     try {
       const result = await this.dataSource
         .getRepository(Test)
@@ -184,48 +184,13 @@ export class TestRepository {
           'test.created_at',
           'test.updated_at',
         ])
-        // 1. is_bookmarked: user_id is NOT NULL and matches this user
-      .addSelect(
-        `EXISTS (
-          SELECT 1 FROM bookmarks b
-          WHERE b.item_id = test.test_id
-            AND b.item_type = :testType
-            AND b.user_id IS NOT NULL
-            AND b.user_id = :userId
-        )`,
-        'is_bookmarked',
-      )
-      // 2. is_student_bookmarked: user_id IS NULL (org level for students)
-      .addSelect(
-        `EXISTS (
-          SELECT 1 FROM bookmarks b
-          WHERE b.item_id = test.test_id
-            AND b.item_type = :testType
-            AND b.org_id = :orgId
-            AND b.user_id IS NULL
-        )`,
-        'is_student_bookmarked',
-      )
         .where('test_id =:testId', { testId })
         .andWhere('test.owner_id = :orgId', { orgId })
-        .setParameters({
-        testType: BookmarkType.TEST,
-        userId,
-        orgId,
-      })
-        .getRawOne();
+        .andWhere('test.status = :isActive', { isActive: TestStatus.ACTIVE })
+        .getOne();
       
-      if (!rawResult) {
-      return null;
-     }
+      return result;
       
-      return {
-      ...rawResult,
-      total_set: Number(rawResult.total_set) || 0,
-      is_bookmarked: rawResult.is_bookmarked === true || rawResult.is_bookmarked === 't',
-      is_student_bookmarked:
-        rawResult.is_student_bookmarked === true || rawResult.is_student_bookmarked === 't',
-    };
     } catch (err) {
       throw err;
     }
