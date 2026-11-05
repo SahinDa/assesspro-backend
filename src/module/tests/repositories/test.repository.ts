@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 import { Test } from '../entities/test.entity';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { createTestDto, updateTestDto } from '../dto/test.dto';
-import { TestStatus } from 'src/config/enum';
+import { TestStatus, BookmarkType } from 'src/config/enum';
 
 @Injectable()
 export class TestRepository {
@@ -92,7 +92,7 @@ export class TestRepository {
       throw err;
     }
   }
-  async getAllTestList(orgId: string, statusList: number[],offset:number,limit:number) {
+  async getAllTestList(orgId: string,userId : string, statusList: number[],offset:number,limit:number) {
     try {
       const result = await this.dataSource
         .getRepository(Test)
@@ -106,14 +106,52 @@ export class TestRepository {
           'test.created_at',
           'test.updated_at',
         ])
+        // 1. is_bookmarked: user_id is NOT NULL and matches this user
+      .addSelect(
+        `EXISTS (
+          SELECT 1 FROM bookmarks b
+          WHERE b.item_id = test.test_id
+            AND b.item_type = :testType
+            AND b.user_id IS NOT NULL
+            AND b.user_id = :userId
+        )`,
+        'is_bookmarked',
+      )
+      // 2. is_student_bookmarked: user_id IS NULL (org level for students)
+      .addSelect(
+        `EXISTS (
+          SELECT 1 FROM bookmarks b
+          WHERE b.item_id = test.test_id
+            AND b.item_type = :testType
+            AND b.org_id = :orgId
+            AND b.user_id IS NULL
+        )`,
+        'is_student_bookmarked',
+       )
         .where('test.owner_id =:orgId', { orgId })
         .andWhere('test.status IN (:...statusList)', { statusList })
+        .setParameters({
+        testType: BookmarkType.TEST,
+        userId,
+        orgId,
+       })
         .orderBy('test.created_at', 'DESC')
         .skip(offset)
         .take(limit)
-        .getMany();
+        .getRawMany();
 
-      return result;
+      return rawResults.map((item) => ({
+      test_id: item.test_id,
+      name: item.name,
+      description: item.description,
+      total_set: Number(item.total_set) || 0,
+      status: item.status,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+      is_bookmarked: item.is_bookmarked === true || item.is_bookmarked === 't',
+      is_student_bookmarked:
+        item.is_student_bookmarked === true || item.is_student_bookmarked === 't',
+    }));
     } catch (err) {
       throw err;
     }
@@ -132,7 +170,7 @@ export class TestRepository {
       throw err;
     }
   }
-  async getTest(testId: string, orgId: string) {
+  async getTest(testId: string, orgId: string,userId:string) {
     try {
       const result = await this.dataSource
         .getRepository(Test)
@@ -146,11 +184,48 @@ export class TestRepository {
           'test.created_at',
           'test.updated_at',
         ])
+        // 1. is_bookmarked: user_id is NOT NULL and matches this user
+      .addSelect(
+        `EXISTS (
+          SELECT 1 FROM bookmarks b
+          WHERE b.item_id = test.test_id
+            AND b.item_type = :testType
+            AND b.user_id IS NOT NULL
+            AND b.user_id = :userId
+        )`,
+        'is_bookmarked',
+      )
+      // 2. is_student_bookmarked: user_id IS NULL (org level for students)
+      .addSelect(
+        `EXISTS (
+          SELECT 1 FROM bookmarks b
+          WHERE b.item_id = test.test_id
+            AND b.item_type = :testType
+            AND b.org_id = :orgId
+            AND b.user_id IS NULL
+        )`,
+        'is_student_bookmarked',
+      )
         .where('test_id =:testId', { testId })
         .andWhere('test.owner_id = :orgId', { orgId })
-        .getOne();
-
-      return result;
+        .setParameters({
+        testType: BookmarkType.TEST,
+        userId,
+        orgId,
+      })
+        .getRawOne();
+      
+      if (!rawResult) {
+      return null;
+     }
+      
+      return {
+      ...rawResult,
+      total_set: Number(rawResult.total_set) || 0,
+      is_bookmarked: rawResult.is_bookmarked === true || rawResult.is_bookmarked === 't',
+      is_student_bookmarked:
+        rawResult.is_student_bookmarked === true || rawResult.is_student_bookmarked === 't',
+    };
     } catch (err) {
       throw err;
     }
