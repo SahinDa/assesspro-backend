@@ -186,7 +186,6 @@ export class TestRepository {
         ])
         .where('test_id =:testId', { testId })
         .andWhere('test.owner_id = :orgId', { orgId })
-        .andWhere('test.status = :isActive', { isActive: TestStatus.ACTIVE })
         .getOne();
       
       return result;
