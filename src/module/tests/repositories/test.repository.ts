@@ -94,64 +94,66 @@ export class TestRepository {
   }
   async getAllTestList(orgId: string,userId : string, statusList: number[],offset:number,limit:number) {
     try {
-      const result = await this.dataSource
-        .getRepository(Test)
-        .createQueryBuilder('test')
-        .select([
-          'test.test_id',
-          'test.name',
-          'test.description',
-          'test.total_set',
-          'test.status',
-          'test.created_at',
-          'test.updated_at',
-        ])
-        // 1. is_bookmarked: user_id is NOT NULL and matches this user
-      .addSelect(
-        `EXISTS (
-          SELECT 1 FROM bookmarks b
-          WHERE b.item_id = test.test_id
-            AND b.item_type = :testType
-            AND b.user_id IS NOT NULL
-            AND b.user_id = :userId
-        )`,
-        'is_bookmarked',
-      )
-      // 2. is_student_bookmarked: user_id IS NULL (org level for students)
-      .addSelect(
-        `EXISTS (
-          SELECT 1 FROM bookmarks b
-          WHERE b.item_id = test.test_id
-            AND b.item_type = :testType
-            AND b.org_id = :orgId
-            AND b.user_id IS NULL
-        )`,
-        'is_student_bookmarked',
-       )
-        .where('test.owner_id =:orgId', { orgId })
-        .andWhere('test.status IN (:...statusList)', { statusList })
-        .setParameters({
-        testType: BookmarkType.TEST,
-        userId,
-        orgId,
-       })
-        .orderBy('test.created_at', 'DESC')
-        .skip(offset)
-        .take(limit)
-        .getRawMany();
+      // 1. Fetch paginated tests as pure TypeORM entities
+    const tests = await this.dataSource
+      .getRepository(Test)
+      .createQueryBuilder('test')
+      .select([
+        'test.test_id',
+        'test.name',
+        'test.description',
+        'test.total_set',
+        'test.status',
+        'test.created_at',
+        'test.updated_at',
+      ])
+      .where('test.owner_id = :orgId', { orgId })
+      .andWhere('test.status IN (:...statusList)', { statusList })
+      .orderBy('test.created_at', 'DESC')
+      .skip(offset)
+      .take(limit)
+      .getMany();
 
-      return result.map((item) => ({
-      test_id: item.test_id,
-      name: item.name,
-      description: item.description,
-      total_set: Number(item.total_set) || 0,
-      status: item.status,
-      created_at: item.created_at,
-      updated_at: item.updated_at,
-      is_bookmarked: item.is_bookmarked === true || item.is_bookmarked === 't',
-      is_student_bookmarked:
-        item.is_student_bookmarked === true || item.is_student_bookmarked === 't',
+      // If no tests match, exit early without making a second query
+    if (!tests.length) {
+      return [];
+    }
+
+    const testIds = tests.map((t) => t.test_id);
+
+    // 2. Fetch only the relevant bookmarks for these test IDs in a single indexed query
+    const bookmarks = await this.dataSource
+      .getRepository(Bookmark)
+      .createQueryBuilder('b')
+      .select(['b.item_id', 'b.user_id', 'b.org_id'])
+      .where('b.item_id IN (:...testIds)', { testIds })
+      .andWhere('b.item_type = :testType', { testType: BookmarkType.TEST })
+      .andWhere(
+        '(b.user_id = :userId OR (b.org_id = :orgId AND b.user_id IS NULL))',
+        { userId, orgId },
+      )
+      .getMany();
+
+    // 3. Build O(1) lookup sets
+    const userBookmarkedIds = new Set(
+      bookmarks
+        .filter((b) => b.user_id === userId)
+        .map((b) => b.item_id),
+    );
+
+    const studentBookmarkedIds = new Set(
+      bookmarks
+        .filter((b) => b.user_id === null)
+        .map((b) => b.item_id),
+    );
+
+    // 4. Attach the booleans directly to each test entity
+    return tests.map((test) => ({
+      ...test,
+      is_bookmarked: userBookmarkedIds.has(test.test_id),
+      is_student_bookmarked: studentBookmarkedIds.has(test.test_id),
     }));
+      
     } catch (err) {
       throw err;
     }
