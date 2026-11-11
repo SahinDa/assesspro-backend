@@ -400,7 +400,7 @@ export class TestSetService {
         throw new ForbiddenException('Your account tier does not have permission to view test sets.');
       }
       
-      return await this.testSetRepository.getAllTestSetList(testId, statusList,offset,limit);
+      return await this.testSetRepository.getAllTestSetList(testId,orgId,organization.user_id, statusList,offset,limit);
       
     } catch (err) {
       throw err;
