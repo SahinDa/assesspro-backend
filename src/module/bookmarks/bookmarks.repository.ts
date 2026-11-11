@@ -101,7 +101,6 @@ export class BookmarksRepository {
       .createQueryBuilder('bm')
       .where('bm.org_id = :orgId', { orgId: resolvedOrgId })
       .andWhere('(bm.user_id = :userId OR bm.user_id IS NULL)', { userId });
-      .where('bm.org_id = :orgId', { orgId: resolvedOrgId });
       
        if (isStudent) {
       // Student:
