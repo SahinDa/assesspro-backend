@@ -5,6 +5,7 @@ import { TestSet } from '../entities/testset.entity';
 import { Question } from '../entities/question.entity';
 import { TestSetStatus, BookmarkType } from 'src/config/enum';
 import { Test } from '../entities/test.entity';
+import { Bookmark } from 'src/module/bookmarks/entities/bookmark.entity';
 
 @Injectable()
 export class TestSetRepository {
@@ -180,7 +181,7 @@ export class TestSetRepository {
     }
   }
 
-  async getAllTestSetList(testId: string,  statusList: number[],offset:number,limit:number) {
+  async getAllTestSetList(testId: string, orgId:string, userId:string, statusList: number[],offset:number,limit:number) {
     try {
       const result = await this.dataSource
         .getRepository(TestSet)
