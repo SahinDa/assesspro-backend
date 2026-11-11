@@ -92,10 +92,11 @@ export class BookmarksRepository {
   }
   async getBookmarkCount(
     resolvedOrgId:string,
-    userId:string | null,
+    userId:string,
+    isStudent : boolean,
   ){
     try{
-    const result = await this.dataSource
+    const qr =  this.dataSource
       .getRepository(Bookmark)
       .createQueryBuilder('bm')
       .select([
@@ -104,10 +105,15 @@ export class BookmarksRepository {
         'COUNT(*) FILTER (WHERE bm.item_type = 2)::int AS "testSetCount"',
         'COUNT(*) FILTER (WHERE bm.user_id IS NULL)::int AS "orgCount"',
       ])
-      .where('bm.org_id = :orgId', { orgId: resolvedOrgId })
-      .andWhere('(bm.user_id = :userId OR bm.user_id IS NULL)', { userId })
-      .getRawOne();
-
+      .where('bm.org_id = :orgId', { orgId: resolvedOrgId });
+      
+        if(isStudent){
+          qr.andWhere('bm.user_id =:userId',{userId});
+        }else{
+          qr.andWhere('(bm.user_id = :userId OR bm.user_id IS NULL)', { userId })
+        }
+      
+      const result = await qr.getRawOne();
     return {
       allCount: Number(result?.allCount || 0),
       testCount: Number(result?.testCount || 0),
