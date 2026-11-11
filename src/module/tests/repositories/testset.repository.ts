@@ -220,7 +220,7 @@ export class TestSetRepository {
       .createQueryBuilder('b')
       .select(['b.item_id', 'b.user_id', 'b.org_id'])
       .where('b.item_id IN (:...testSetIds)', { testSetIds })
-      .andWhere('b.item_type = :testType', { testType: BookmarkType.TESTSET })
+      .andWhere('b.item_type = :testType', { testType: BookmarkType.TEST_SET })
       .andWhere(
         '(b.user_id = :userId OR (b.org_id = :orgId AND b.user_id IS NULL))',
         { userId, orgId },
