@@ -207,7 +207,43 @@ export class TestSetRepository {
         .take(limit)
         .getMany();
 
-      return result;
+      
+       if (!result.length) {
+        return [];
+      }
+
+    const testSetIds = result.map((t) => t.set_id);
+      
+    const bookmarks = await this.dataSource
+      .getRepository(Bookmark)
+      .createQueryBuilder('b')
+      .select(['b.item_id', 'b.user_id', 'b.org_id'])
+      .where('b.item_id IN (:...testSetIds)', { testSetIds })
+      .andWhere('b.item_type = :testType', { testType: BookmarkType.TESTSET })
+      .andWhere(
+        '(b.user_id = :userId OR (b.org_id = :orgId AND b.user_id IS NULL))',
+        { userId, orgId },
+      )
+      .getMany();
+
+    const userBookmarkedIds = new Set(
+      bookmarks
+        .filter((b) => b.user_id === userId)
+        .map((b) => b.item_id),
+    );
+
+    const studentBookmarkedIds = new Set(
+      bookmarks
+        .filter((b) => b.user_id === null)
+        .map((b) => b.item_id),
+    );
+
+    return result.map((testset) => ({
+      ...testset,
+      is_bookmarked: userBookmarkedIds.has(testset.set_id),
+      is_student_bookmarked: studentBookmarkedIds.has(testset.set_id),
+    }));
+      
     } catch (err) {
       throw err;
     }
