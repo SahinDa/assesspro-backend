@@ -160,6 +160,7 @@ async getBookmarkCount(
   return await this.bookmarksrepository.getBookmarkCount(
     resolvedOrgId,
     userId,
+    organization.role === UserRole.STUDENT,
   );
 }
     
