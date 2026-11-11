@@ -96,24 +96,34 @@ export class BookmarksRepository {
     isStudent : boolean,
   ){
     try{
-    const qr =  this.dataSource
+    const qr = this.dataSource
       .getRepository(Bookmark)
       .createQueryBuilder('bm')
-      .select([
+      .where('bm.org_id = :orgId', { orgId: resolvedOrgId })
+      .andWhere('(bm.user_id = :userId OR bm.user_id IS NULL)', { userId });
+      .where('bm.org_id = :orgId', { orgId: resolvedOrgId });
+      
+       if (isStudent) {
+      // Student:
+      // allCount, testCount, testSetCount -> strictly personal bookmarks (user_id = :userId)
+      // orgCount -> curated org bookmarks (user_id IS NULL)
+      qr.select([
+        'COUNT(*) FILTER (WHERE bm.user_id = :userId)::int AS "allCount"',
+        'COUNT(*) FILTER (WHERE bm.item_type = 1 AND bm.user_id = :userId)::int AS "testCount"',
+        'COUNT(*) FILTER (WHERE bm.item_type = 2 AND bm.user_id = :userId)::int AS "testSetCount"',
+        'COUNT(*) FILTER (WHERE bm.user_id IS NULL)::int AS "orgCount"',
+      ]);
+    } else {
+      // Organization / Admin:
+      qr.select([
         'COUNT(*)::int AS "allCount"',
         'COUNT(*) FILTER (WHERE bm.item_type = 1)::int AS "testCount"',
         'COUNT(*) FILTER (WHERE bm.item_type = 2)::int AS "testSetCount"',
         'COUNT(*) FILTER (WHERE bm.user_id IS NULL)::int AS "orgCount"',
-      ])
-      .where('bm.org_id = :orgId', { orgId: resolvedOrgId });
+      ]);
+    }
       
-        if(isStudent){
-          qr.andWhere('bm.user_id =:userId',{userId});
-        }else{
-          qr.andWhere('(bm.user_id = :userId OR bm.user_id IS NULL)', { userId })
-        }
-      
-      const result = await qr.getRawOne();
+    const result = await qr.getRawOne();
     return {
       allCount: Number(result?.allCount || 0),
       testCount: Number(result?.testCount || 0),
