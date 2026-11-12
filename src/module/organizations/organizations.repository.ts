@@ -6,6 +6,7 @@ import {
   OrganizationRole,
   OrganizationStatus,
   UserRole,
+  OrgUserSearchType ,
 } from 'src/config/enum';
 import { User } from '../users/entities/user.entity';
 import { DataSource } from 'typeorm';
@@ -470,6 +471,74 @@ async removeUserFromOrg(orgId: string, userId: string): Promise<boolean> {
 
   return (result.affected ?? 0) > 0;
 }
+
+async searchOrgUsersByType(
+  targetOrgId: string,
+  searchQuery: string,
+  type: OrgUserSearchType,
+  limit: number = 10,
+  offset: number = 0,
+) {
+  const searchPattern = `%${searchQuery.trim()}%`;
+
+  if (type === OrgUserSearchType.ACTIVE) {
+    return await this.dataSource
+      .getRepository(UserOrganization)
+      .createQueryBuilder('uo')
+      .innerJoin(User, 'user', 'user.user_id = uo.user_id AND user.is_deleted = false')
+      .select([
+        'uo.id AS "membershipId"',
+        'user.user_id AS "userId"',
+        'user.firstname AS "firstName"',
+        'user.lastname AS "lastName"',
+        'user.email AS "email"',
+        'user.profile_pic AS "profilePic"',
+        'uo.role AS "role"',
+        'uo.joined_date AS "joinedDate"',
+      ])
+      .where('uo.org_id = :targetOrgId', { targetOrgId })
+      .andWhere('uo.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere(
+        `(user.firstname ILIKE :search OR user.lastname ILIKE :search OR CONCAT(user.firstname, ' ', COALESCE(user.lastname, '')) ILIKE :search OR user.email ILIKE :search)`,
+        { search: searchPattern },
+      )
+      .orderBy('uo.joined_date', 'DESC')
+      .limit(limit)
+      .offset(offset)
+      .getRawMany();
+  }
+
+  const targetStatus =
+    type === OrgUserSearchType.PENDING
+      ? JoinRequestStatus.PENDING
+      : JoinRequestStatus.REJECTED;
+
+  return await this.dataSource
+    .getRepository(JoinRequest)
+    .createQueryBuilder('jr')
+    .innerJoin(User, 'user', 'user.user_id = jr.user_id AND user.is_deleted = false')
+    .select([
+      'jr.id AS "requestId"',
+      'user.user_id AS "userId"',
+      'user.firstname AS "firstName"',
+      'user.lastname AS "lastName"',
+      'user.email AS "email"',
+      'user.profile_pic AS "profilePic"',
+      'jr.created_at AS "requestedAt"',
+    ])
+    .where('jr.organization_id = :targetOrgId', { targetOrgId })
+    .andWhere('jr.status = :status', { status: targetStatus })
+    .andWhere(
+      `(user.firstname ILIKE :search OR user.lastname ILIKE :search OR CONCAT(user.firstname, ' ', COALESCE(user.lastname, '')) ILIKE :search OR user.email ILIKE :search)`,
+      { search: searchPattern },
+    )
+    .orderBy('jr.created_at', 'DESC')
+    .limit(limit)
+    .offset(offset)
+    .getRawMany();
+}  
+  
+  
   
   async isValid(organizationId: string): Promise<boolean> {
     const org = await this.dataSource.getRepository(Organization).findOne({
