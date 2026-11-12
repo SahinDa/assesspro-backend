@@ -118,7 +118,7 @@ export class OrganizationsController {
   }
    @Get('join-requests/rejected')
   @Roles(UserRole.ORGANIZATION,UserRole.ADMIN)
-  async getPendingJoinRequests(
+  async getRejectedRequests(
     @Organization() organization: IOrganization,
     @Query('orgId') orgId?: string,
     @Query('limit') limit?: string,
