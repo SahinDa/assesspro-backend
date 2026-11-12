@@ -336,7 +336,7 @@ async removeUser(organization: IOrganization, userId: string) {
     throw new BadRequestException('Cannot remove yourself from the organization');
   }
   
-  const isValidRelation = await isValidUserOrganizationRelation(userId,orgId);
+  const isValidRelation = await this.isValidUserOrganizationRelation(userId,orgId);
   if(!isValidRelation){
     throw new NotFoundException('User is not an active member of this organization');
   }
