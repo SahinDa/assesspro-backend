@@ -185,7 +185,7 @@ export class OrganizationsService {
       if (!targetOrgId) {
         throw new BadRequestException('Invalid organization ');
       }
-      return await this.usersRepository.getAllOrgUsersList(
+      return await this.organizationsrepository.getAllOrgUsersList(
         targetOrgId,
         limit,
         offset,
@@ -209,7 +209,7 @@ export class OrganizationsService {
       if (!targetOrgId) {
         throw new BadRequestException('Invalid organization ');
       }
-      return await this.usersRepository.getAllOrgUsersCount(targetOrgId);
+      return await this.organizationsrepository.getAllOrgUsersCount(targetOrgId);
     } catch (err) {
       throw err;
     }
