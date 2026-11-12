@@ -456,7 +456,21 @@ async getRejectedRequests(
       return true;
     });
   }
+  
+async removeUserFromOrg(orgId: string, userId: string): Promise<boolean> {
+  const result = await this.dataSource
+    .getRepository(UserOrganization)
+    .createQueryBuilder()
+    .update(UserOrganization)
+    .set({ is_deleted: true })
+    .where('org_id = :orgId', { orgId })
+    .andWhere('user_id = :userId', { userId })
+    .andWhere('is_deleted = :isDeleted', { isDeleted: false })
+    .execute();
 
+  return (result.affected ?? 0) > 0;
+}
+  
   async isValid(organizationId: string): Promise<boolean> {
     const org = await this.dataSource.getRepository(Organization).findOne({
       where: {
