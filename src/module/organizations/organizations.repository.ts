@@ -281,6 +281,7 @@ export class OrganizationsRepository {
           'user.user_id AS "userId"',
           'user.firstname AS "firstName"',
           'user.lastname AS "lastName"',
+          'user.email AS "email"',
           'user.profile_pic AS "profilePic"',
           'jr.created_at AS "requestedAt"',
         ])
@@ -312,6 +313,7 @@ async getRejectedRequests(
           'user.user_id AS "userId"',
           'user.firstname AS "firstName"',
           'user.lastname AS "lastName"',
+          'user.email AS "email"',
           'user.profile_pic AS "profilePic"',
           'jr.created_at AS "requestedAt"',
         ])
