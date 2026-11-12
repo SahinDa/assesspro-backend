@@ -85,10 +85,20 @@ export class OrganizationsController {
 
   // 1. Fetch all applications waiting for review
   @Get('join-requests/pending')
-  @Roles(UserRole.ORGANIZATION)
-  async getPendingJoinRequests(@Organization() organization: IOrganization) {
+  @Roles(UserRole.ORGANIZATION,UserRole.ADMIN)
+  async getPendingJoinRequests(
+    @Organization() organization: IOrganization,
+    @Query('orgId') orgId?: string,
+    @Query('limit') limit?: string,
+   @Query('offset') offset?: string,
+  ) {
+    const parsedLimit = limit ? Math.max(1, parseInt(limit, 10)) : 10;
+    const parsedOffset = offset ? Math.max(0, parseInt(offset, 10)) : 0;
     return this.organizationsservice.getPendingJoinRequests(
-      organization.org_id,
+      organization,
+      orgId,
+      parsedLimit,
+      parsedOffset,
     );
   }
 
@@ -106,4 +116,22 @@ export class OrganizationsController {
       input,
     );
   }
+   @Get('join-requests/rejected')
+  @Roles(UserRole.ORGANIZATION,UserRole.ADMIN)
+  async getPendingJoinRequests(
+    @Organization() organization: IOrganization,
+    @Query('orgId') orgId?: string,
+    @Query('limit') limit?: string,
+   @Query('offset') offset?: string,
+  ) {
+    const parsedLimit = limit ? Math.max(1, parseInt(limit, 10)) : 10;
+    const parsedOffset = offset ? Math.max(0, parseInt(offset, 10)) : 0;
+    return this.organizationsservice.getRejectedRequests(
+      organization,
+      orgId,
+      parsedLimit,
+      parsedOffset,
+    );
+  }
+  
 }
