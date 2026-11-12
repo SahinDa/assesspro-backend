@@ -275,7 +275,7 @@ export class OrganizationsRepository {
       const organizationList = await this.dataSource
         .getRepository(JoinRequest)
         .createQueryBuilder('jr')
-        .innerJoin(User, 'user', 'user.user_id = jr.user_id')
+        .innerJoin(User, 'user', 'user.user_id = jr.user_id AND user.is_deleted = false')
         .select([
           'jr.id AS "requestId"',
           'user.user_id AS "userId"',
@@ -307,7 +307,7 @@ async getRejectedRequests(
       const organizationList = await this.dataSource
         .getRepository(JoinRequest)
         .createQueryBuilder('jr')
-        .innerJoin(User, 'user', 'user.user_id = jr.user_id')
+        .innerJoin(User, 'user', 'user.user_id = jr.user_id AND user.is_deleted = false')
         .select([
           'jr.id AS "requestId"',
           'user.user_id AS "userId"',
