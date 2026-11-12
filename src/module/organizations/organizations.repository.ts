@@ -268,7 +268,7 @@ export class OrganizationsRepository {
 
   async getPendingJoinRequests(
     orgId: string,
-    limig: number = 10,
+    limit: number = 10,
     offset : number = 0,
   ) {
     try {
@@ -299,7 +299,7 @@ export class OrganizationsRepository {
   
 async getRejectedRequests(
     orgId: string,
-    limig: number = 10,
+    limit: number = 10,
     offset : number = 0,
   ) {
     try {
