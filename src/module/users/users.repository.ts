@@ -11,6 +11,8 @@ import { UserStatus, UserRole } from 'src/config/enum';
 import { UserOrganization } from './entities/userorganization.entity';
 import { UserDTO } from './dto/user.dto';
 import { OrganizationStatus } from 'src/config/enum';
+import { JoinRequest } from 'src/module/organizations/entities/join-request.entity';
+import { JoinRequestStatus } from 'src/config/enum';
 
 @Injectable()
 export class UsersRepository {
@@ -255,21 +257,48 @@ export class UsersRepository {
     }
   }
 
-  async getAllOrgUsersList(targetOrgId: string) {
+  async getAllOrgUsersList(
+    targetOrgId: string,
+    limit:number = 10,
+    offset:number = 0,
+  ) {
     return await this.dataSource
       .getRepository(UserOrganization)
       .createQueryBuilder('uo')
       .where('uo.org_id = :targetOrgId', { targetOrgId })
       .andWhere('uo.is_deleted = : status', { status: false })
+      .orderBy('uo.created_at', 'DESC')
+      .take(limit)
+      .skip(offset)
       .getMany();
   }
 
   async getAllOrgUsersCount(targetOrgId: string) {
-    return await this.dataSource
+    const [activeCount, joinRequestStats] = await Promise.all([
+     this.dataSource
       .getRepository(UserOrganization)
       .createQueryBuilder('uo')
       .where('uo.org_id = :targetOrgId', { targetOrgId })
       .andWhere('uo.is_deleted = : status', { status: false })
-      .getCount();
+      .getCount(),
+
+    this.dataSource
+      .getRepository(JoinRequest)
+      .createQueryBuilder('jr')
+      .select([
+        'COUNT(*) FILTER (WHERE jr.status = :pending)::int AS "pendingCount"',
+        'COUNT(*) FILTER (WHERE jr.status = :rejected)::int AS "rejectedCount"',
+      ])
+      .where('jr.organization_id = :targetOrgId', { targetOrgId })
+      .setParameters({
+        pending: JoinRequestStatus.PENDING,
+        rejected: JoinRequestStatus.REJECTED,
+      })
+      .getRawOne(),
   }
+  return {
+    activeCount: Number(activeCount || 0),
+    pendingCount: Number(joinRequestStats?.pendingCount || 0),
+    rejectedCount: Number(joinRequestStats?.rejectedCount || 0),
+  };
 }
