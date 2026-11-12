@@ -114,8 +114,18 @@ export class UsersController {
   async getAllOrgUsers(
     @Organization() Organization: IOrganization,
     @Query('orgId') orgId?: string,
+    @Query('limit') limit?: string,
+   @Query('offset') offset?: string,
   ) {
-    return this.userService.getAllOrgUsersList(Organization, orgId);
+    const parsedLimit = limit ? Math.max(1, parseInt(limit, 10)) : 20;
+    const parsedOffset = offset ? Math.max(0, parseInt(offset, 10)) : 0;
+    return this.userService.getAllOrgUsersList(
+    organization,
+    orgId,
+    parsedLimit,
+    parsedOffset,
+  );
+    
   }
 
   // Get Total Count of Users
