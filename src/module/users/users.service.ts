@@ -249,7 +249,12 @@ export class UsersService {
     }
   }
 
-  async getAllOrgUsersList(organization: IOrganization, orgId?: string) {
+  async getAllOrgUsersList(
+    organization: IOrganization,
+    orgId?: string,
+    limit:number= 20,
+    offset:number = 0,
+  ) {
     try {
       let targetOrgId: string | undefined;
       if (organization.role === UserRole.ORGANIZATION) {
@@ -263,7 +268,11 @@ export class UsersService {
       if (!targetOrgId) {
         throw new BadRequestException('Invalid organization ');
       }
-      return await this.usersRepository.getAllOrgUsersList(targetOrgId);
+      return await this.usersRepository.getAllOrgUsersList(
+        targetOrgId,
+        limit,
+        offset,
+      );
     } catch (err) {
       throw err;
     }
