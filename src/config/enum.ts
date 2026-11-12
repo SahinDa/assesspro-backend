@@ -284,6 +284,12 @@ export enum AttemptSortBy {
   LOWEST_SCORE = 'lowest_score',
 }
 
+export enum OrgUserSearchType {
+  ACTIVE = 1,
+  PENDING = 2,
+  REJECTED = 3,
+}
+
 export enum OrganizationSubscriptionFeatureKey {
   MAX_TEST_SETS = 'max_test_sets',
   MAX_REATTEMPTS = 'max_reattempts',
