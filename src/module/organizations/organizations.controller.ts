@@ -181,7 +181,7 @@ export class OrganizationsController {
   @Organization() organization: IOrganization,
   @Query() queryDto: SearchOrgUsersQueryDto,
 ) {
-  return await this.organizationsService.searchOrgUsers(organization, queryDto);
+  return await this.organizationsservice.searchOrgUsers(organization, queryDto);
 }
   
 }
