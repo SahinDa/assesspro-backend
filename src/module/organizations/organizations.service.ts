@@ -341,7 +341,7 @@ async removeUser(organization: IOrganization, userId: string) {
     throw new NotFoundException('User is not an active member of this organization');
   }
 
-  await this.organizationsRepository.removeUserFromOrg(orgId, userId);
+  await this.organizationsrepository.removeUserFromOrg(orgId, userId);
   
   return {
     success: true,
