@@ -21,6 +21,7 @@ import { UsersService } from '../users/users.service';
 import {
   JoinRequestStatus,
   PlatformSubscriptionFeatureKey,
+  UserRole,
 } from 'src/config/enum';
 import { SubscriptionService } from '../subscriptions/subscription.service';
 
