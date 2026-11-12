@@ -94,7 +94,7 @@ export class OrganizationsController {
   ) {
     const parsedLimit = limit ? Math.max(1, parseInt(limit, 10)) : 10;
     const parsedOffset = offset ? Math.max(0, parseInt(offset, 10)) : 0;
-    return this.userService.getAllOrgUsersList(
+    return this.organizationsservice.getAllOrgUsersList(
     organization,
     orgId,
     parsedLimit,
@@ -111,8 +111,9 @@ export class OrganizationsController {
     @Organization() organization: IOrganization,
     @Query('orgId') orgId?: string,
   ) {
-    return await this.userService.getAllOrgUsersCount(organization, orgId);
+    return await this.organizationsservice.getAllOrgUsersCount(organization, orgId);
   }
+  
   // 1. Fetch all applications waiting for review
   @Get('join-requests/pending')
   @Roles(UserRole.ORGANIZATION,UserRole.ADMIN)
