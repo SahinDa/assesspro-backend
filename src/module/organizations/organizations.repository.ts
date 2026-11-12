@@ -265,7 +265,64 @@ export class OrganizationsRepository {
       throw err;
     }
   }
+  async getAllOrgUsersList(
+    targetOrgId: string,
+    limit:number = 10,
+    offset:number = 0,
+  ) {
+    return await this.dataSource
+      .getRepository(UserOrganization)
+      .createQueryBuilder('uo')
+      .innerJoin(User, 'user', 'user.user_id = uo.user_id AND user.is_deleted = false')
+      .select([
+      'uo.id AS "membershipId"',
+      'user.user_id AS "userId"',
+      'user.firstname AS "firstName"',
+      'user.lastname AS "lastName"',
+      'user.email AS "email"',
+      'user.profile_pic AS "profilePic"',
+      'uo.role AS "role"',
+      'uo.joined_date AS "joinedDate"',
+    ])
+      .where('uo.org_id = :targetOrgId', { targetOrgId })
+      .andWhere('uo.is_deleted = :status', { status: false })
+      .orderBy('uo.joined_date', 'DESC')
+      .take(limit)
+      .skip(offset)
+      .getRawMany();
+  }
 
+  async getAllOrgUsersCount(targetOrgId: string) {
+    const [activeCount, joinRequestStats] = await Promise.all([
+     this.dataSource
+      .getRepository(UserOrganization)
+      .createQueryBuilder('uo')
+      .innerJoin(User, 'user', 'user.user_id = uo.user_id AND user.is_deleted = false')
+      .where('uo.org_id = :targetOrgId', { targetOrgId })
+      .andWhere('uo.is_deleted = :status', { status: false })
+      .getCount(),
+
+    this.dataSource
+      .getRepository(JoinRequest)
+      .createQueryBuilder('jr')
+      .innerJoin(User, 'user', 'user.user_id = jr.user_id AND user.is_deleted = false')
+      .select([
+        'COUNT(*) FILTER (WHERE jr.status = :pending)::int AS "pendingCount"',
+        'COUNT(*) FILTER (WHERE jr.status = :rejected)::int AS "rejectedCount"',
+      ])
+      .where('jr.organization_id = :targetOrgId', { targetOrgId })
+      .setParameters({
+        pending: JoinRequestStatus.PENDING,
+        rejected: JoinRequestStatus.REJECTED,
+      })
+      .getRawOne(),
+      ]);
+  return {
+    activeCount: Number(activeCount || 0),
+    pendingCount: Number(joinRequestStats?.pendingCount || 0),
+    rejectedCount: Number(joinRequestStats?.rejectedCount || 0),
+  };
+  }
   async getPendingJoinRequests(
     orgId: string,
     limit: number = 10,
