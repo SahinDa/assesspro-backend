@@ -19,6 +19,9 @@ import {
   OrganizationInputDTO,
   UpdateOrgStatusDto,
 } from './dto/Organization.dto';
+import {
+  SearchOrgUsersQueryDto
+} from './dto/search-org-users.dto';
 import { User } from 'src/decorators/user.decorator';
 import { IAuthenticatedUser } from 'src/interfaces/user.interfaces';
 import { Organization } from 'src/decorators/organization.decorator';
@@ -172,4 +175,13 @@ export class OrganizationsController {
     ){
     return this.organizationsservice.removeUser(organization,userId);
   }
+  @Get('users/search')
+   @Roles(UserRole.ORGANIZATION,UserRole.ADMIN)
+ async searchOrgUsers(
+  @Organization() organization: IOrganization,
+  @Query() queryDto: SearchOrgUsersQueryDto,
+) {
+  return await this.organizationsService.searchOrgUsers(organization, queryDto);
+}
+  
 }
