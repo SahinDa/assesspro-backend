@@ -295,10 +295,11 @@ export class UsersRepository {
         rejected: JoinRequestStatus.REJECTED,
       })
       .getRawOne(),
-  }
+      ]);
   return {
     activeCount: Number(activeCount || 0),
     pendingCount: Number(joinRequestStats?.pendingCount || 0),
     rejectedCount: Number(joinRequestStats?.rejectedCount || 0),
   };
+  }
 }
