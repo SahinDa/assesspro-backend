@@ -365,7 +365,7 @@ async searchOrgUsers(
      throw new BadRequestException('Invalid organization');
    }
   
-  return await this.organizationsRepository.searchOrgUsersByType(
+  return await this.organizationsrepository.searchOrgUsersByType(
     targetOrgId,
     searchDto.query,
     Number(searchDto.type),
