@@ -24,6 +24,9 @@ import {
   UserRole,
 } from 'src/config/enum';
 import { SubscriptionService } from '../subscriptions/subscription.service';
+import {
+  SearchOrgUsersQueryDto
+} from './dto/search-org-users.dto';
 
 @Injectable()
 export class OrganizationsService {
@@ -347,6 +350,28 @@ async removeUser(organization: IOrganization, userId: string) {
     success: true,
     message: 'Student removed from organization successfully.',
   };
+}
+async searchOrgUsers(
+  organization: IOrganization,
+  searchDto: SearchOrgUsersQueryDto,
+) {
+     let targetOrgId: string | undefined;
+      if (organization.role === UserRole.ORGANIZATION) {
+        targetOrgId = organization.org_id;
+      } else if (organization.role === UserRole.ADMIN) {
+        targetOrgId = searchDto.orgId;
+      }
+   if(!targetOrgId){
+     throw new BadRequestException('Invalid organization');
+   }
+  
+  return await this.organizationsRepository.searchOrgUsersByType(
+    targetOrgId,
+    searchDto.query,
+    Number(searchDto.type),
+    searchDto.limit ?? 10,
+    searchDto.offset ?? 0,
+  );
 }
   
   async isValid(organizationId: string) {
