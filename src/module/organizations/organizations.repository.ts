@@ -266,7 +266,11 @@ export class OrganizationsRepository {
     }
   }
 
-  async getPendingJoinRequests(orgId: string) {
+  async getPendingJoinRequests(
+    orgId: string,
+    limig: number = 10,
+    offset : number = 0,
+  ) {
     try {
       const organizationList = await this.dataSource
         .getRepository(JoinRequest)
@@ -283,6 +287,8 @@ export class OrganizationsRepository {
         .where('jr.organization_id = :orgId', { orgId })
         .andWhere('jr.status = :status', { status: JoinRequestStatus.PENDING })
         .orderBy('jr.created_at', 'DESC')
+        .take(limit)
+        .skip(offset)
         .getRawMany();
 
       return organizationList;
@@ -290,6 +296,38 @@ export class OrganizationsRepository {
       throw err;
     }
   }
+  
+async getRejectedRequests(
+    orgId: string,
+    limig: number = 10,
+    offset : number = 0,
+  ) {
+    try {
+      const organizationList = await this.dataSource
+        .getRepository(JoinRequest)
+        .createQueryBuilder('jr')
+        .innerJoin(User, 'user', 'user.user_id = jr.user_id')
+        .select([
+          'jr.id AS "requestId"',
+          'user.user_id AS "userId"',
+          'user.firstname AS "firstName"',
+          'user.lastname AS "lastName"',
+          'user.profile_pic AS "profilePic"',
+          'jr.created_at AS "requestedAt"',
+        ])
+        .where('jr.organization_id = :orgId', { orgId })
+        .andWhere('jr.status = :status', { status: JoinRequestStatus.REJECTED })
+        .orderBy('jr.created_at', 'DESC')
+        .take(limit)
+        .skip(offset)
+        .getRawMany();
+
+      return organizationList;
+    } catch (err) {
+      throw err;
+    }
+  }
+  
   // 🎯 1. Enforce ownership validation
   async validateRequestOwnership(
     orgId: string,
