@@ -164,9 +164,54 @@ export class OrganizationsService {
       throw err;
     }
   }
-  async getPendingJoinRequests(orgId: string) {
+  async getPendingJoinRequests(
+    organization: IOrganization,
+    orgId?:string,
+    limit:number = 10,
+    offset:number = 0,
+  ) {
     try {
-      return await this.organizationsrepository.getPendingJoinRequests(orgId);
+         let targetOrgId: string | undefined;
+      if (organization.role === UserRole.ORGANIZATION) {
+        targetOrgId = organization.org_id;
+      } else if (organization.role === UserRole.ADMIN) {
+        targetOrgId = orgId;
+      }
+
+      if (!targetOrgId) {
+        throw new BadRequestException('Invalid organization ');
+      }
+      return await this.organizationsrepository.getPendingJoinRequests(
+        targetOrgId,
+        limit,
+        offset,
+      );
+    } catch (err) {
+      throw err;
+    }
+  }
+async getRejectedRequests(
+    organization: IOrganization,
+    orgId?:string,
+    limit:number = 10,
+    offset:number = 0,
+  ) {
+    try {
+         let targetOrgId: string | undefined;
+      if (organization.role === UserRole.ORGANIZATION) {
+        targetOrgId = organization.org_id;
+      } else if (organization.role === UserRole.ADMIN) {
+        targetOrgId = orgId;
+      }
+
+      if (!targetOrgId) {
+        throw new BadRequestException('Invalid organization ');
+      }
+      return await this.organizationsrepository.getRejectedRequests(
+        targetOrgId,
+        limit,
+        offset,
+      );
     } catch (err) {
       throw err;
     }
