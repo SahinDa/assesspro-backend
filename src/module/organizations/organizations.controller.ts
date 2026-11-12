@@ -164,5 +164,12 @@ export class OrganizationsController {
       parsedOffset,
     );
   }
-  
+  @Delete('users/:userId')
+   @Roles(UserRole.ORGANIZATION)
+  async removeUser(
+     @Param('userId', ParseUUIDPipe) userId: string,
+     @Organization() organization: IOrganization,
+    ){
+    return this.organizationsservice.removeUser(organization,userId);
+  }
 }
