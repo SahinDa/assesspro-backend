@@ -265,7 +265,7 @@ export class UsersRepository {
     return await this.dataSource
       .getRepository(UserOrganization)
       .createQueryBuilder('uo')
-      .innerJoin(User, 'user', 'user.user_id = uo.user_id')
+      .innerJoin(User, 'user', 'user.user_id = uo.user_id AND user.is_deleted = false')
       .select([
       'uo.id AS "membershipId"',
       'user.user_id AS "userId"',
@@ -277,11 +277,11 @@ export class UsersRepository {
       'uo.joined_date AS "joinedDate"',
     ])
       .where('uo.org_id = :targetOrgId', { targetOrgId })
-      .andWhere('uo.is_deleted = : status', { status: false })
-      .orderBy('uo.created_at', 'DESC')
+      .andWhere('uo.is_deleted = :status', { status: false })
+      .orderBy('uo.joined_date', 'DESC')
       .take(limit)
       .skip(offset)
-      .getMany();
+      .getRawMany();
   }
 
   async getAllOrgUsersCount(targetOrgId: string) {
@@ -291,13 +291,13 @@ export class UsersRepository {
       .createQueryBuilder('uo')
       .innerJoin(User, 'user', 'user.user_id = uo.user_id AND user.is_deleted = false')
       .where('uo.org_id = :targetOrgId', { targetOrgId })
-      .andWhere('uo.is_deleted = : status', { status: false })
+      .andWhere('uo.is_deleted = :status', { status: false })
       .getCount(),
 
     this.dataSource
       .getRepository(JoinRequest)
       .createQueryBuilder('jr')
-      .innerJoin(User, 'user', 'user.user_id = uo.user_id AND user.is_deleted = false')
+      .innerJoin(User, 'user', 'user.user_id = jr.user_id AND user.is_deleted = false')
       .select([
         'COUNT(*) FILTER (WHERE jr.status = :pending)::int AS "pendingCount"',
         'COUNT(*) FILTER (WHERE jr.status = :rejected)::int AS "rejectedCount"',
