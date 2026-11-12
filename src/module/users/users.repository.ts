@@ -265,6 +265,17 @@ export class UsersRepository {
     return await this.dataSource
       .getRepository(UserOrganization)
       .createQueryBuilder('uo')
+      .innerJoin(User, 'user', 'user.user_id = uo.user_id')
+      .select([
+      'uo.id AS "membershipId"',
+      'user.user_id AS "userId"',
+      'user.firstname AS "firstName"',
+      'user.lastname AS "lastName"',
+      'user.email AS "email"',
+      'user.profile_pic AS "profilePic"',
+      'uo.role AS "role"',
+      'uo.joined_date AS "joinedDate"',
+    ])
       .where('uo.org_id = :targetOrgId', { targetOrgId })
       .andWhere('uo.is_deleted = : status', { status: false })
       .orderBy('uo.created_at', 'DESC')
