@@ -82,7 +82,37 @@ export class OrganizationsController {
   async newJoinOrganizationList(@User() user: IAuthenticatedUser) {
     return this.organizationsservice.newJoinOrganizationList(user.user_id);
   }
+  // Get Total Count of Users
+  @Get('/list')
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ORGANIZATION, UserRole.ADMIN)
+  async getAllOrgUsers(
+    @Organization() organization: IOrganization,
+    @Query('orgId') orgId?: string,
+    @Query('limit') limit?: string,
+   @Query('offset') offset?: string,
+  ) {
+    const parsedLimit = limit ? Math.max(1, parseInt(limit, 10)) : 10;
+    const parsedOffset = offset ? Math.max(0, parseInt(offset, 10)) : 0;
+    return this.userService.getAllOrgUsersList(
+    organization,
+    orgId,
+    parsedLimit,
+    parsedOffset,
+  );
+    
+  }
 
+  // Get Total Count of Users
+  @Get('/count')
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ORGANIZATION, UserRole.ADMIN)
+  async getUserCount(
+    @Organization() organization: IOrganization,
+    @Query('orgId') orgId?: string,
+  ) {
+    return await this.userService.getAllOrgUsersCount(organization, orgId);
+  }
   // 1. Fetch all applications waiting for review
   @Get('join-requests/pending')
   @Roles(UserRole.ORGANIZATION,UserRole.ADMIN)
