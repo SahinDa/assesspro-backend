@@ -289,6 +289,7 @@ export class UsersRepository {
      this.dataSource
       .getRepository(UserOrganization)
       .createQueryBuilder('uo')
+      .innerJoin(User, 'user', 'user.user_id = uo.user_id AND user.is_deleted = false')
       .where('uo.org_id = :targetOrgId', { targetOrgId })
       .andWhere('uo.is_deleted = : status', { status: false })
       .getCount(),
@@ -296,6 +297,7 @@ export class UsersRepository {
     this.dataSource
       .getRepository(JoinRequest)
       .createQueryBuilder('jr')
+      .innerJoin(User, 'user', 'user.user_id = uo.user_id AND user.is_deleted = false')
       .select([
         'COUNT(*) FILTER (WHERE jr.status = :pending)::int AS "pendingCount"',
         'COUNT(*) FILTER (WHERE jr.status = :rejected)::int AS "rejectedCount"',
