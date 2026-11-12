@@ -112,7 +112,7 @@ export class UsersController {
   @UseGuards(RoleGuard)
   @Roles(UserRole.ORGANIZATION, UserRole.ADMIN)
   async getAllOrgUsers(
-    @Organization() Organization: IOrganization,
+    @Organization() organization: IOrganization,
     @Query('orgId') orgId?: string,
     @Query('limit') limit?: string,
    @Query('offset') offset?: string,
