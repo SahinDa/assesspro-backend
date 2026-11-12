@@ -322,7 +322,33 @@ async getRejectedRequests(
       throw err;
     }
   }
+  
+async removeUser(organization: IOrganization, userId: string) {
+  const orgId = organization.org_id;
+  if (!orgId) {
+    throw new BadRequestException('Invalid organization');
+  }
 
+ if(!userId ){
+    throw new BadRequestException('UserId is required');
+ }
+  if (organization.user_id === userId) {
+    throw new BadRequestException('Cannot remove yourself from the organization');
+  }
+  
+  const isValidRelation = await isValidUserOrganizationRelation(userId,orgId);
+  if(!isValidRelation){
+    throw new NotFoundException('User is not an active member of this organization');
+  }
+
+  await this.organizationsRepository.removeUserFromOrg(orgId, userId);
+  
+  return {
+    success: true,
+    message: 'Student removed from organization successfully.',
+  };
+}
+  
   async isValid(organizationId: string) {
     try {
       return this.organizationsrepository.isValid(organizationId);
