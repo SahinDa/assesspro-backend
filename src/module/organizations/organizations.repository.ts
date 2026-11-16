@@ -286,6 +286,7 @@ export class OrganizationsRepository {
       'uo.joined_date AS "joinedDate"',
     ])
       .where('uo.org_id = :targetOrgId', { targetOrgId })
+      .andWhere('user.role !=:role ',{role:UserRole.ORGANIZATION})
       .andWhere('uo.is_deleted = :status', { status: false })
       .orderBy('uo.joined_date', 'DESC')
       .take(limit)
