@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateInAppNotificationDto } from './dto/createinappnotification.dto';
 import { DataSource } from 'typeorm';
 import { NotificationEntity } from './entities/notification.entity';
-import {NotificationFilterEnum } from 'src/config/enum';
+import {NotificationFilterEnum , UserRole} from 'src/config/enum';
 
 @Injectable()
 export class NotificationsRepository {
@@ -29,26 +29,51 @@ export class NotificationsRepository {
   async getNotifications(
     userId: string,
     orgId: string,
+    role:UserRole,
     limit: number = 20,
     offset: number = 0,
     type?:NotificationFilterEnum,
   ): Promise<NotificationEntity[]> {
 const query: FindOptionsWhere<NotificationEntity>[] = [];
-
-  if (type === NotificationFilterEnum.GLOBAL) {
-    query.push({ org_id: orgId, is_global: true });
-    // If platform-wide Admin broadcasts have org_id = null, include:
-    // where.push({ org_id: IsNull(), is_global: true });
+   if(role === UserRole.STUDENT){
+    if (type === NotificationFilterEnum.GLOBAL) {
+    // Students only see global announcements published by their Organization
+      query.push({ org_id: orgId, user_id: IsNull(), is_global: true });
   } else if (type === NotificationFilterEnum.PERSONAL) {
     query.push({ org_id: orgId, user_id: userId, is_global: false });
   } else {
     // All (when `type` is omitted)
     query.push(
-      { org_id: orgId, user_id: userId, is_global: false },
-      { org_id: orgId, is_global: true },
-      // { org_id: IsNull(), is_global: true },
-    );
+        { org_id: orgId, user_id: userId, is_global: false },
+        { org_id: orgId, user_id: IsNull(), is_global: true },
+      );
   }
+}else if(role === UserRole.ORGANIZATION){
+    if (type === NotificationFilterEnum.GLOBAL) {
+    // Only Admin broadcasts (org_id IS NULL) are "Global" to an Organization
+      query.push({ org_id: IsNull(), user_id: IsNull(), is_global: true });
+  } else if (type === NotificationFilterEnum.PERSONAL) {
+    query.push(
+        { org_id: orgId, user_id: userId, is_global: false },
+        { org_id: orgId, user_id: IsNull(), is_global: true },
+      );
+  } else {
+    // All (when `type` is omitted)
+    query.push(
+        { org_id: orgId, user_id: userId, is_global: false },
+        { org_id: orgId, user_id: IsNull(), is_global: true },
+        { org_id: IsNull(), user_id: IsNull(), is_global: true },
+      );
+  }
+}else if (role === UserRole.ADMIN){
+  query.push(
+      { user_id: userId, is_global: false },
+      { org_id: IsNull(), user_id: IsNull(), is_global: true },
+    );
+}
+
+    if (query.length === 0) return [];
+    
     return this.dataSource.getRepository(NotificationEntity).find({
     where : query,
     order: {
