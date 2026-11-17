@@ -40,7 +40,7 @@ async sendAnnouncement(
       userId: null,
       orgId: isAdmin ? null : organization.org_id,
       is_global: true,
-      isPinned: isAdmin ? (input.isPinned ?? false) : false,
+      isPinned: input.isPinned ?? false,
     });
   } catch (err) {
     if (err instanceof HttpException) throw err;
