@@ -80,6 +80,7 @@ async sendAnnouncement(
       return await this.notificationsrepository.getNotifications(
         organization.user_id,
         targetOrgId,
+        organization.role,
         limit,
         offset,
         type,
