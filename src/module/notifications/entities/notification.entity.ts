@@ -15,10 +15,10 @@ export class NotificationEntity {
 
   @Column({ type: 'uuid', nullable: true })
   @Index() // Index for fast lookup of a specific user's messages
-  user_id?: string | null;
+  user_id: string | null;
 
   @Column({ type: 'uuid' , nullable : true})
-  org_id?: string;
+  org_id: string | null;
 
   @Column({ type: 'boolean', default: false })
   is_global: boolean; // Flag to easily identify broadcasts
@@ -30,7 +30,7 @@ export class NotificationEntity {
   message: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  url?: string | null;
+  url: string | null;
 
   @Column({ type: 'boolean', default: false })
   is_pinned: boolean;
