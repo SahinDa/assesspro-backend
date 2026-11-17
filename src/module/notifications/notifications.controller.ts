@@ -21,7 +21,12 @@ export class NotificationsController {
 
   //this single endpoint is responsible for sending all kind of notificaton
   @Post()
-  async sendNotification() {}
+  async sendAnnouncement(
+  @Organization() organization: IOrganization,
+  @Body() input: CreateInAppNotificationDto,
+) {
+  return await this.notificationsservice.sendAnnouncement(organization, input);
+}
 
   //return all notification based on one user
   @Get()
