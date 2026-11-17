@@ -8,12 +8,13 @@ import {
   Param,
   Delete,
   Query,
-  ParseUUIDPipe,
+  Body,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { Organization } from 'src/decorators/organization.decorator';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import {NotificationFilterEnum } from 'src/config/enum';
+import { CreateInAppNotificationDto } from './dto/createinappnotification.dto';
 
 @Controller('notifications')
 export class NotificationsController {
