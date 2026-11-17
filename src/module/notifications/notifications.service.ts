@@ -3,7 +3,7 @@ import { NotificationsRepository } from './notifications.repository';
 import { CreateInAppNotificationDto } from './dto/createinappnotification.dto';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { OrganizationsService } from '../organizations/organizations.service';
-import { UserRole } from 'src/config/enum';
+import { UserRole, NotificationFilterEnum } from 'src/config/enum';
 import { NotificationEntity } from './entities/notification.entity';
 
 @Injectable()
@@ -25,6 +25,7 @@ export class NotificationsService {
     offset: number,
     limit: number,
     orgId?: string,
+    type?:NotificationFilterEnum,
   ): Promise<NotificationEntity[]> {
     try {
       let targetOrgId = orgId;
@@ -53,6 +54,7 @@ export class NotificationsService {
         targetOrgId,
         limit,
         offset,
+        type,
       );
     } catch (err) {
       throw new Error('Could not fetch notifications');
