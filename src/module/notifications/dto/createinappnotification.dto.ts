@@ -11,11 +11,11 @@ export class CreateInAppNotificationDto {
   // Marked optional because it will be null for global broadcasts
   @IsUUID()
   @IsOptional()
-  userId?: string;
+  userId?: string | null;
 
   @IsUUID()
-  @IsNotEmpty()
-  orgId: string;
+  @IsOptional()
+  orgId?: string | null;
 
   @IsBoolean()
   @IsOptional()
