@@ -12,7 +12,7 @@ export class NotificationsRepository {
       const repo = this.dataSource.getRepository(NotificationEntity);
       const notification = repo.create({
         user_id: input.userId ?? null,
-        org_id: input.orgId,
+        org_id: input.orgId ?? null,
         is_global: input.is_global ?? false,
         subject: input.subject,
         message: input.message,
