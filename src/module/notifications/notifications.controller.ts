@@ -10,6 +10,7 @@ import {
 import { NotificationsService } from './notifications.service';
 import { Organization } from 'src/decorators/organization.decorator';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
+import {NotificationFilterEnum } from 'src/config/enum';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -27,12 +28,14 @@ export class NotificationsController {
     orgId?: string,
     @Query('offset', new ParseIntPipe({ optional: true })) offset: number = 0,
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
+    @Query('type') type?:NotificationFilterEnum ,
   ) {
     return await this.notificationsservice.getNotifications(
       organization,
       offset,
       limit,
       orgId,
+      type,
     );
   }
 
