@@ -60,7 +60,29 @@ const query: FindOptionsWhere<NotificationEntity>[] = [];
   });
     
   }
+  
+async deleteNotification(notificationId:string,userId:string,orgId:string){
+const repo = this.dataSource.getRepository(NotificationEntity);
 
+  // Organization role: can only delete its own global broadcasts
+  if (orgId) {
+    const result = await repo.delete({
+      notification_id: notificationId,
+      org_id: orgId,
+      is_global: true,
+    });
+    return result.affected ?? 0;
+  }
+
+  // Student / direct recipient: can only delete their own personal notifications
+  const result = await repo.delete({
+    notification_id: notificationId,
+    user_id: userId,
+    is_global: false,
+  });
+  return result.affected ?? 0;
+}
+  
   async deleteOldNotifications(oneMonthAgo: Date): Promise<number> {
     const result = await this.dataSource
       .getRepository(NotificationEntity)
