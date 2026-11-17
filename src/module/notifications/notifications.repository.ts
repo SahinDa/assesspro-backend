@@ -50,7 +50,7 @@ const query: FindOptionsWhere<NotificationEntity>[] = [];
     );
   }
     return this.dataSource.getRepository(NotificationEntity).find({
-    query,
+    where : query,
     order: {
       is_pinned: 'DESC',
       created_at: 'DESC',
