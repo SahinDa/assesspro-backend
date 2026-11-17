@@ -294,3 +294,9 @@ export enum OrganizationSubscriptionFeatureKey {
   MAX_TEST_SETS = 'max_test_sets',
   MAX_REATTEMPTS = 'max_reattempts',
 }
+
+
+export enum NotificationFilterEnum {
+  GLOBAL = 1,
+  PERSONAL = 2,
+}
