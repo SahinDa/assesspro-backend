@@ -19,6 +19,34 @@ export class NotificationsService {
       console.log('fail to add notification ');
     }
   }
+async sendAnnouncement(
+  organization: IOrganization,
+  input: CreateInAppNotificationDto,
+) {
+  if (
+    organization.role !== UserRole.ADMIN &&
+    organization.role !== UserRole.ORGANIZATION
+  ) {
+    throw new ForbiddenException(
+      'Only admins and organizations can publish announcements',
+    );
+  }
+
+  const isAdmin = organization.role === UserRole.ADMIN;
+
+  try {
+    return await this.notificationsrepository.createInAppNotification({
+      ...input,
+      userId: null,
+      orgId: isAdmin ? null : organization.org_id,
+      is_global: true,
+      isPinned: isAdmin ? (input.isPinned ?? false) : false,
+    });
+  } catch (err) {
+    if (err instanceof HttpException) throw err;
+    throw new InternalServerErrorException('Failed to publish announcement');
+  }
+}  
 
   async getNotifications(
     organization: IOrganization,
