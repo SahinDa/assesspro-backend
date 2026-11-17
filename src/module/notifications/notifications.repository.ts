@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreateInAppNotificationDto } from './dto/createinappnotification.dto';
-import { DataSource } from 'typeorm';
+import { DataSource , FindOptionsWhere, IsNull} from 'typeorm';
 import { NotificationEntity } from './entities/notification.entity';
 import {NotificationFilterEnum , UserRole} from 'src/config/enum';
+
 
 @Injectable()
 export class NotificationsRepository {
