@@ -60,4 +60,25 @@ export class NotificationsService {
       throw new Error('Could not fetch notifications');
     }
   }
+ async deleteNotification(
+  organization: IOrganization,
+  notificationId: string,
+){
+   try{
+     //for organization org_id is a valid id so if org id is there 
+     const isDeleted = await this.notificationsrepository.deleteNotification(notificationId,organization.user_id,organization.org_id);
+     if (!isDeleted) {
+      throw new NotFoundException(
+        'Notification not found or cannot be deleted',
+      );
+    }
+
+    return { 
+      message:"Notification deleted Successfully",
+    };
+   }catch (err) {
+    if (err instanceof HttpException) throw err;
+    throw new InternalServerErrorException('Could not delete notification');
+  }
+ }
 }
