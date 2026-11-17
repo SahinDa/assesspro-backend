@@ -5,7 +5,10 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Param,
+  Delete,
   Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { Organization } from 'src/decorators/organization.decorator';
@@ -38,7 +41,15 @@ export class NotificationsController {
       type,
     );
   }
-
+  
+  @Delete(':notificationId')
+  async deleteNotification(
+    @Organization() organization: IOrganization,
+      @Param('notificationId', ParseUUIDPipe) notificationId: string,
+  ){
+    return await this.notificationsservice.deleteNotification(organization,notificationId);
+  }
+  
   @Get(':notificationId')
   async getNotificationDetails() {}
 
