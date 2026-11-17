@@ -28,7 +28,7 @@ export class NotificationsController {
     orgId?: string,
     @Query('offset', new ParseIntPipe({ optional: true })) offset: number = 0,
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
-    @Query('type') type?:NotificationFilterEnum ,
+    @Query('type', new ParseIntPipe({ optional: true })) type?:NotificationFilterEnum ,
   ) {
     return await this.notificationsservice.getNotifications(
       organization,
