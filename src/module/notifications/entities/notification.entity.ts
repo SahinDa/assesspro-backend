@@ -17,8 +17,8 @@ export class NotificationEntity {
   @Index() // Index for fast lookup of a specific user's messages
   user_id?: string | null;
 
-  @Column({ type: 'uuid' })
-  org_id: string;
+  @Column({ type: 'uuid' , nullable : true})
+  org_id?: string;
 
   @Column({ type: 'boolean', default: false })
   is_global: boolean; // Flag to easily identify broadcasts
