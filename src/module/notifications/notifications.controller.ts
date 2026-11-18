@@ -33,7 +33,7 @@ export class NotificationsController {
   @Get()
   async getAllUserNotification(
     @Organization() organization: IOrganization,
-    @Query('id', new ParseUUIDPipe({ version: '4', optional: true }))
+    @Query('orgId', new ParseUUIDPipe({ version: '4', optional: true }))
     orgId?: string,
     @Query('offset', new ParseIntPipe({ optional: true })) offset: number = 0,
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
