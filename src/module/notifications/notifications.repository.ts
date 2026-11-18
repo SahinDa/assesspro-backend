@@ -56,20 +56,17 @@ const query: FindOptionsWhere<NotificationEntity>[] = [];
   } else if (type === NotificationFilterEnum.PERSONAL) {
     query.push(
         { org_id: orgId, user_id: userId, is_global: false },
-        { org_id: orgId, user_id: IsNull(), is_global: true },
       );
   } else {
     // All (when `type` is omitted)
     query.push(
         { org_id: orgId, user_id: userId, is_global: false },
-        { org_id: orgId, user_id: IsNull(), is_global: true },
         { org_id: IsNull(), user_id: IsNull(), is_global: true },
       );
   }
 }else if (role === UserRole.ADMIN){
   query.push(
       { user_id: userId, is_global: false },
-      { org_id: IsNull(), user_id: IsNull(), is_global: true },
     );
 }
 
