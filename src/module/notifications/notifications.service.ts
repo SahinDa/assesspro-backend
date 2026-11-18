@@ -42,13 +42,16 @@ async sendAnnouncement(
   const isAdmin = organization.role === UserRole.ADMIN;
 
   try {
-    return await this.notificationsrepository.createInAppNotification({
+    await this.notificationsrepository.createInAppNotification({
       ...input,
       userId: null,
       orgId: isAdmin ? null : organization.org_id,
       is_global: true,
       isPinned: input.isPinned ?? false,
     });
+    return { 
+      message:"Announcement saved Successfully",
+    };
   } catch (err) {
     if (err instanceof HttpException) throw err;
     throw new InternalServerErrorException('Failed to publish announcement');
