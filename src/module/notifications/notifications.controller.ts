@@ -15,13 +15,18 @@ import { Organization } from 'src/decorators/organization.decorator';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import {NotificationFilterEnum } from 'src/config/enum';
 import { CreateInAppNotificationDto } from './dto/createinappnotification.dto';
+import { RoleGuard } from 'src/guards/role.guard';
+import { Roles } from 'src/decorators/role.decorator';
+import { UserRole } from 'src/config/enum';
 
 @Controller('notifications')
+@UseGuards(RoleGuard)
 export class NotificationsController {
   constructor(private readonly notificationsservice: NotificationsService) {}
 
   //this single endpoint is responsible for sending all kind of notificaton
   @Post()
+  @Roles(UserRole.ORGANIZATION, UserRole.ADMIN)
   async sendAnnouncement(
   @Organization() organization: IOrganization,
   @Body() input: CreateInAppNotificationDto,
@@ -31,6 +36,7 @@ export class NotificationsController {
 
   //return all notification based on one user
   @Get()
+  @Roles(UserRole.STUDENT, UserRole.ORGANIZATION, UserRole.ADMIN)
   async getAllUserNotification(
     @Organization() organization: IOrganization,
     @Query('orgId', new ParseUUIDPipe({ version: '4', optional: true }))
@@ -49,6 +55,7 @@ export class NotificationsController {
   }
   
   @Delete(':notificationId')
+  @Roles(UserRole.STUDENT, UserRole.ORGANIZATION, UserRole.ADMIN)
   async deleteNotification(
     @Organization() organization: IOrganization,
       @Param('notificationId', ParseUUIDPipe) notificationId: string,
