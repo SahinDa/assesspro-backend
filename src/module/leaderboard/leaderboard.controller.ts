@@ -37,7 +37,7 @@ export class LeaderboardController {
   async getTestSetLeaderboard(
     @Organization() organization: IOrganization,
     @Param('setId') setId: string,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
     @Query('offset', new ParseIntPipe({ optional: true })) offset: number = 0,
   ) {
     return await this.leaderboardservice.getLeaderboardByTestSet(
