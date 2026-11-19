@@ -29,7 +29,7 @@ export class LeaderboardController {
     @Organization() organization: IOrganization,
     @Query() filter: LeaderboardFilterDto,
   ) {
-    return await this.leaderboardService.getLeaderboard(organization, filter);
+    return await this.leaderboardservice.getLeaderboard(organization, filter);
   }
   
   @Get('/set/:setId')
@@ -40,12 +40,12 @@ export class LeaderboardController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
     @Query('offset', new ParseIntPipe({ optional: true })) offset: number = 0,
   ) {
-    return await this.leaderboardservice.getLeaderboardByTestSet(
-      organization,
-      setId,
-      limit,
-      offset,
-    );
+    // return await this.leaderboardservice.getLeaderboardByTestSet(
+    //   organization,
+    //   setId,
+    //   limit,
+    //   offset,
+    // );
   }
 
   @Get('/contest/:testId')
@@ -56,11 +56,11 @@ export class LeaderboardController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
     @Query('offset', new ParseIntPipe({ optional: true })) offset: number = 0,
   ) {
-    return await this.leaderboardservice.getLeaderboardByTest(
-      organization,
-      testId,
-      limit,
-      offset,
-    );
+    // return await this.leaderboardservice.getLeaderboardByTest(
+    //   organization,
+    //   testId,
+    //   limit,
+    //   offset,
+    // );
   }
 }
