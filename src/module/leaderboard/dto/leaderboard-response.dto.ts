@@ -5,7 +5,7 @@ export interface LeaderboardRow {
   score: number;
   violation_score: number;
   duration_seconds: number;
-  firstname: string | null;
+  firstname: string;
   lastname: string | null;
   email: string;
   profile_pic: string | null;
