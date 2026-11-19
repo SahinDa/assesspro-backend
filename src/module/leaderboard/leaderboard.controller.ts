@@ -14,6 +14,7 @@ import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { RoleGuard } from 'src/guards/role.guard';
 import { Roles } from 'src/decorators/role.decorator';
 import { UserRole } from 'src/config/enum';
+import { LeaderboardFilterDto } from './dto/leaderboard-filter.dto';
 
 @Controller('leaderboard')
 @UseGuards(RoleGuard)
@@ -21,6 +22,16 @@ import { UserRole } from 'src/config/enum';
 export class LeaderboardController {
   constructor(private readonly leaderboardservice: LeaderboardService) {}
 
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.STUDENT, UserRole.ORGANIZATION, UserRole.ADMIN)
+  async getLeaderboard(
+    @Organization() organization: IOrganization,
+    @Query() filter: LeaderboardFilterDto,
+  ) {
+    return await this.leaderboardService.getLeaderboard(organization, filter);
+  }
+  
   @Get('/set/:setId')
   @HttpCode(HttpStatus.OK)
   async getTestSetLeaderboard(
