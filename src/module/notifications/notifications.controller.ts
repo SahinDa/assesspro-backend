@@ -9,6 +9,7 @@ import {
   Delete,
   Query,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { Organization } from 'src/decorators/organization.decorator';
