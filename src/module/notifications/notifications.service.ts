@@ -105,7 +105,8 @@ async sendAnnouncement(
 ){
    try{
      //for organization org_id is a valid id so if org id is there 
-     const isDeleted = await this.notificationsrepository.deleteNotification(notificationId,organization.user_id,organization.org_id);
+     boolean isAdmin = organization.role === UserRole.ADMIN;
+     const isDeleted = await this.notificationsrepository.deleteNotification(notificationId,organization.user_id,organization.org_id,isAdmin);
      if (!isDeleted) {
       throw new NotFoundException(
         'Notification not found or cannot be deleted',
