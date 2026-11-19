@@ -84,9 +84,22 @@ const query: FindOptionsWhere<NotificationEntity>[] = [];
     
   }
   
-async deleteNotification(notificationId:string,userId:string,orgId:string){
+async deleteNotification(
+  notificationId:string,
+  userId:string,
+  orgId:string,
+  isAdmin :boolean,
+){
 const repo = this.dataSource.getRepository(NotificationEntity);
 
+if(isAdmin){
+    const result = await repo.delete({
+    notification_id: notificationId,
+     org_id: IsNull(),
+  });
+  return result.affected ?? 0;
+  }
+  
   // Organization role: can only delete its own global broadcasts
   if (orgId) {
     const result = await repo.delete({
