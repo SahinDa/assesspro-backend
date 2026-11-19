@@ -1,12 +1,119 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable ,NotFoundException,  } from '@nestjs/common';
 import { LeaderboardRepository } from './leaderboard.repository';
-import { LeaderboardResultRow } from './dto/leaderboard-response.dto';
+import {
+  LeaderboardRow,
+  UnifiedLeaderboardRow,
+  LeaderboardResponse,
+} from './dto/leaderboard-response.dto';
+import { LeaderboardFilterDto } from './dto/leaderboard-filter.dto';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
+import { OrganizationsService } from '../organizations/organizations.service';
 import { UserRole } from 'src/config/enum';
 
 @Injectable()
 export class LeaderboardService {
-  constructor(private readonly leaderboardrepository: LeaderboardRepository) {}
+  constructor(
+    private readonly leaderboardrepository: LeaderboardRepository,
+    private readonly organizationsservice: OrganizationsService,
+  ) {} 
+  
+  async getLeaderboard(
+    organization: IOrganization,
+    filter: LeaderboardFilterDto,
+  ) {
+    try {
+      const limit = filter?.limit ?? 10;
+      const offset = filter?.offset ?? 0;
+      let orgId: string | null = null;
+
+      if (organization.role === UserRole.ORGANIZATION) {
+        orgId = organization?.org_id ?? null;
+      } else if (organization.role === UserRole.STUDENT) {
+        orgId = filter?.orgId ?? null;
+        if (!orgId) {
+          throw new NotFoundException('Organization id is required');
+        }
+          const partOfOrganization =
+          await this.organizationsservice.isValidUserOrganization(
+            organization.user_id,
+            orgId
+          );
+        if (!partOfOrganization) {
+          throw new ForbiddenException(
+            'Access Denied: You are not an active member of this organization.',
+          );
+        }
+      } else if (organization.role === UserRole.ADMIN) {
+        orgId = filter?.orgId ?? null;
+      }
+
+      if (!orgId) {
+        throw new NotFoundException('Organization id is required');
+      }
+
+      const { data, total, prevPageLastItem } =
+        await this.leaderboardrepository.getLeaderboard(orgId, filter);
+
+     let rankedData: LeaderboardRow[] = [];
+
+   if (total > 0 && data && data.length > 0) {
+     let currentRank = offset + 1;
+
+   rankedData = data.map((item, index, array) => {
+    let prev: UnifiedLeaderboardRow | null = null;
+
+    if (index > 0) {
+      prev = array[index - 1];
+    } else if (index === 0 && prevPageLastItem) {
+      prev = prevPageLastItem;
+    }
+
+    if (prev) {
+      const scoreMatches = Number(item.score) === Number(prev.score);
+      const violationsMatch =
+        Number(item.violation_score) === Number(prev.violation_score);
+      const durationMatches =
+        Number(item.duration_seconds) === Number(prev.duration_seconds);
+
+      if (!(scoreMatches && violationsMatch && durationMatches)) {
+        currentRank = offset + index + 1;
+      }
+    }
+
+    return {
+      rank: currentRank,
+      attempt_id: item.attempt_id ?? '',
+      user_id: item.user_id,
+      score: filter?.testset_id
+         ? Number(item.score ?? 0)
+         : parseFloat(Number(item.score ?? 0).toFixed(2)),
+      violation_score: Number(item.violation_score ?? 0 ),
+      duration_seconds: Math.round(Number(item.duration_seconds ?? 0 )),
+      firstname: item.firstname,
+      lastname: item.lastname,
+      email: item.email,
+      profile_pic: item.profile_pic,
+    };
+  });
+}
+
+  return {
+     data: rankedData,
+     meta: {
+        total_items: Number(total),
+        limit,
+        offset,
+        has_more: Number(total) > offset + limit,
+          },
+     };
+      
+    } catch (err) {
+      console.log('Failed to retrieve leaderboard::', err.message);
+      throw err;
+    }
+  }
+}
+
   async getLeaderboardByTestSet(
     organizaiton: IOrganization,
     setId: string,
