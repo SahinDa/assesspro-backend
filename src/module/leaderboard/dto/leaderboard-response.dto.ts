@@ -25,7 +25,7 @@ export interface UnifiedLeaderboardRow {
   score: number | string;
   violation_score: number | string;
   duration_seconds: number | string;
-  firstname: string | null;
+  firstname: string;
   lastname: string | null;
   email: string;
   profile_pic: string | null;
