@@ -1,6 +1,10 @@
 export interface LeaderboardRow {
   rank: number;
   attempt_id: string;
+  test_id: string;
+  test_name: string;
+  testset_id: string;
+  testset_name: string;
   user_id: string;
   score: number;
   violation_score: number;
@@ -14,6 +18,10 @@ export interface LeaderboardRow {
 export interface UnifiedLeaderboardRow {
   attempt_id: string | null;
   user_id: string;
+  test_id: string;
+  test_name: string;
+  testset_id: string;
+  testset_name: string;
   score: number | string;
   violation_score: number | string;
   duration_seconds: number | string;
