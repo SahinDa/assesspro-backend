@@ -85,7 +85,7 @@ export class LeaderboardRepository {
 
   }
 
-  async getLeaderboardOptions(orgId:string ,testId:string ,isTestset:boolean){
+  async getLeaderboardOptions(orgId:string ,isTestset:boolean,testId?:string ){
 
      if(isTestset){
        return await this.datasource
