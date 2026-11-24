@@ -201,22 +201,22 @@ export class LeaderboardService {
       const limit = filter.limit ?? 10;
       const offset = filter.offset ?? 0;
 
-      const data: LeaderboardRow[] = rows.map((row) => ({
-        rank: Number(row.rank),
-        attempt_id: row.attempt_id,
-        test_id: row.test_id,
-        test_name: row.test_name,
-        testset_id: row.testset_id,
-        testset_name: row.testset_name,
-        user_id: row.user_id,
-        firstname: row.firstname ?? '',
-        lastname: row.lastname ?? null,
-        email: row.email,
-        profile_pic: row.profile_pic ?? null,
-        score: Number(row.score ?? 0),
-        violation_score: Number(row.violation_score ?? 0),
-        duration_seconds: Number(row.duration_seconds ?? 0),
-      }));
+    const data: LeaderboardRow[] = rows.map((row) => ({
+  rank: Number(row.rank),
+  attempt_id: row.attempt_id ?? '',
+  test_id: row.test_id,
+  test_name: row.test_name,
+  testset_id: row.testset_id,
+  testset_name: row.testset_name,
+  user_id: row.user_id,
+  firstname: row.firstname ?? '',
+  lastname: row.lastname ?? null,
+  email: row.email,
+  profile_pic: row.profile_pic ?? null,
+  score: Number(row.score ?? 0),
+  violation_score: Number(row.violation_score ?? 0),
+  duration_seconds: Number(row.duration_seconds ?? 0),
+}));
 
       return {
         data,
