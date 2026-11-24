@@ -36,7 +36,7 @@ export class GetAssessmentOptionsQueryDto {
 
   @IsOptional()
   @IsString()
-  testId?: string;
+  test_id?: string;
   
   @IsOptional()
   @Transform(({ value }) => {
