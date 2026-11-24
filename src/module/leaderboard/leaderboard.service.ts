@@ -124,7 +124,7 @@ export class LeaderboardService {
     try{
       let orgId: string | null = null;
       let isTestset :boolean = filter?.isTestset ?? false;
-      let testId : string = filter?.test_id ;
+      const testId: string | undefined = filter?.test_id;
       
         if (organization.role === UserRole.ORGANIZATION) {
         orgId = organization?.org_id ?? null;
