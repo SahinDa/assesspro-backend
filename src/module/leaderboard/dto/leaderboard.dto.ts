@@ -65,5 +65,17 @@ export class GetLeaderboardSearchDto {
   @IsString()
   @IsNotEmpty({ message: 'searchKeyword cannot be empty' })
   searchKeyword: string;
+  
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  offset?: number;
 }
   
