@@ -47,3 +47,23 @@ export class GetAssessmentOptionsQueryDto {
   @IsBoolean()
   isTestset?: boolean = false;
 }
+
+export class GetLeaderboardSearchDto {
+  @IsOptional()
+  @IsUUID()
+  orgId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  test_id?: string;
+
+  @IsOptional()
+  @IsUUID()
+  testset_id?: string;
+
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString()
+  @IsNotEmpty({ message: 'searchKeyword cannot be empty' })
+  searchKeyword: string;
+}
+  
