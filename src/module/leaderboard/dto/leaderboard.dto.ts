@@ -35,6 +35,10 @@ export class GetAssessmentOptionsQueryDto {
   orgId?: string;
 
   @IsOptional()
+  @IsString()
+  testId?: string;
+  
+  @IsOptional()
   @Transform(({ value }) => {
     if (value === 'true' || value === true) return true;
     if (value === 'false' || value === false) return false;
