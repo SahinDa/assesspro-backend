@@ -4,7 +4,7 @@ import { TestAttempt } from '../attempts/entities/testattempt.entity';
 import { TestSet } from '../tests/entities/testset.entity';
 import { OrganizationStatus, TestSetStatus, TestStatus } from 'src/config/enum';
 import { Test } from '../tests/entities/test.entity';
-import { LeaderboardFilterDto } from './dto/leaderboard.dto';
+import { LeaderboardFilterDto,GetLeaderboardSearchDto, } from './dto/leaderboard.dto';
 import { UnifiedLeaderboardRow } from './dto/leaderboard-response.dto';
 
 @Injectable()
@@ -111,7 +111,82 @@ export class LeaderboardRepository {
        .getRawMany()
   }
     
+async searchLeaderboard(
+    filter: GetLeaderboardSearchDto,
+  ): Promise<{ data: (UnifiedLeaderboardRow & { rank: string | number })[]; total: number }> {
+    const limit = filter.limit ?? 10;
+    const offset = filter.offset ?? 0;
+    const keyword = `%${filter.searchKeyword.trim()}%`;
 
+    const rankedQb = this.datasource
+      .getRepository(TestAttempt)
+      .createQueryBuilder('ta')
+      .innerJoin(Test, 't', 'ta.test_id = t.test_id')
+      .innerJoin('organizations', 'o', 'o.id = t.owner_id')
+      .innerJoin(TestSet, 'ts', 'ta.set_id = ts.set_id AND ts.test_id = t.test_id')
+      .innerJoin('users', 'u', 'ta.user_id = u.user_id')
+      .where('t.owner_id = :orgId', { orgId: filter.orgId })
+      .andWhere('o.status = :orgStatus', {
+        orgStatus: OrganizationStatus.ACTIVE,
+      })
+      .andWhere('t.status = :testStatus', { testStatus: TestStatus.ACTIVE })
+      .andWhere('ts.status = :setStatus', { setStatus: TestSetStatus.ACTIVE })
+      .andWhere('ta.attempt_number = 1');
+
+    if (filter.test_id) {
+      rankedQb.andWhere('ta.test_id = :testId', { testId: filter.test_id });
+    }
+
+    if (filter.testset_id) {
+      rankedQb.andWhere('ta.set_id = :setId', { setId: filter.testset_id });
+    }
+
+    rankedQb.select([
+      'DENSE_RANK() OVER (ORDER BY ta.score DESC, ta.violation_score ASC, (ta.end_time - ta.start_time) ASC) AS rank',
+      'ta.attempt_id AS attempt_id',
+      't.test_id AS test_id',
+      't.name AS test_name',
+      'ts.set_id AS testset_id',
+      'ts.name AS testset_name',
+      'ta.user_id AS user_id',
+      'ta.score AS score',
+      'ta.violation_score AS violation_score',
+      'EXTRACT(EPOCH FROM (ta.end_time - ta.start_time)) AS duration_seconds',
+      'u.firstname AS firstname',
+      'u.lastname AS lastname',
+      'u.email AS email',
+      'u.profile_pic AS profile_pic',
+    ]);
+
+    const rows = await this.datasource
+      .createQueryBuilder()
+      .addCommonTableExpression(rankedQb, 'ranked_standings')
+      .select(['rs.*', 'COUNT(*) OVER() AS total_count'])
+      .from('ranked_standings', 'rs')
+      .where(
+        `(
+          COALESCE(rs.firstname, '') ILIKE :keyword
+          OR COALESCE(rs.lastname, '') ILIKE :keyword
+          OR CONCAT_WS(' ', rs.firstname, rs.lastname) ILIKE :keyword
+          OR rs.email ILIKE :keyword
+        )`,
+        { keyword },
+      )
+      .orderBy('rs.rank', 'ASC')
+      .addOrderBy('rs.attempt_id', 'ASC')
+      .limit(limit)
+      .offset(offset)
+      .getRawMany<
+        UnifiedLeaderboardRow & {
+          rank: string | number;
+          total_count: string | number;
+        }
+      >();
+
+    const total = rows.length > 0 ? Number(rows[0].total_count) : 0;
+
+    return { data: rows, total };
+  }
   // async getLeaderboardByTestSet(
   //   setId: string,
   //   limit: number,
