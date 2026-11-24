@@ -5,7 +5,7 @@ import {
   UnifiedLeaderboardRow,
   LeaderboardResponse,
 } from './dto/leaderboard-response.dto';
-import { LeaderboardFilterDto, GetAssessmentOptionsQueryDto } from './dto/leaderboard.dto';
+import { LeaderboardFilterDto, GetAssessmentOptionsQueryDto, GetLeaderboardSearchDto } from './dto/leaderboard.dto';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { UserRole } from 'src/config/enum';
@@ -161,6 +161,79 @@ export class LeaderboardService {
         throw err;
       }
       throw new InternalServerErrorException('Failed to retrieve leaderboard options');
+    }
+  }
+
+ async searchLeaderboard(
+    organization: IOrganization,
+    filter: GetLeaderboardSearchDto
+  ){
+    try{
+       filter.limit = filter.limit ?? 10;
+       filter.offset = filter.offset ?? 0;
+      
+        if (organization.role === UserRole.ORGANIZATION) {
+         filter.orgId= organization?.org_id;
+      } else if (organization.role === UserRole.STUDENT) {
+        let orgId = filter?.orgId;
+        if (!orgId) {
+          throw new NotFoundException('Organization id is required');
+        }
+          const partOfOrganization =
+          await this.organizationsservice.isValidUserOrganization(
+            organization.user_id,
+            orgId
+          );
+        if (!partOfOrganization) {
+          throw new ForbiddenException(
+            'Access Denied: You are not an active member of this organization.',
+          );
+        }
+      }
+
+      if (!filter.orgId) {
+        throw new NotFoundException('Organization id is required');
+      }
+
+     const { data: rows, total } =
+        await this.leaderboardrepository.searchLeaderboard(filter);
+
+      const limit = filter.limit ?? 10;
+      const offset = filter.offset ?? 0;
+
+      const data: LeaderboardRow[] = rows.map((row) => ({
+        rank: Number(row.rank),
+        attempt_id: row.attempt_id,
+        test_id: row.test_id,
+        test_name: row.test_name,
+        testset_id: row.testset_id,
+        testset_name: row.testset_name,
+        user_id: row.user_id,
+        firstname: row.firstname ?? '',
+        lastname: row.lastname ?? null,
+        email: row.email,
+        profile_pic: row.profile_pic ?? null,
+        score: Number(row.score ?? 0),
+        violation_score: Number(row.violation_score ?? 0),
+        duration_seconds: Number(row.duration_seconds ?? 0),
+      }));
+
+      return {
+        data,
+        meta: {
+          total_items: total,
+          limit,
+          offset,
+          has_next: offset + data.length < total,
+        },
+      };
+      
+    }catch(err){
+      console.log(`Failed to retrieve Leaderboard Search:: ${err.message}`);
+     if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new InternalServerErrorException('Failed to retrieve leaderboard Search');
     }
   }
   // async getLeaderboardByTestSet(
