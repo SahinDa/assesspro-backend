@@ -89,15 +89,16 @@ export class LeaderboardRepository {
 
      if(isTestset){
        return await this.datasource
-        .getRepository(TestSet)
-        .createQueryBuilder('ts')
-        .where('ts.owner_id = :orgId', { orgId })
-        .andWhere('ts.test_id =:testId',{testId}) 
-        .select([
-         'ts.set_id AS testset_id',
-         'ts.name As testset_name',
-          ])
-        .getRawMany()
+      .getRepository(TestSet)
+      .createQueryBuilder('ts')
+      .innerJoin('ts.test', 't')
+      .where('t.owner_id = :orgId', { orgId })
+      .andWhere('ts.test_id = :testId', { testId })
+      .select([
+        'ts.set_id AS testset_id',
+        'ts.name AS testset_name',
+      ])
+      .getRawMany();
      }
      return await this.datasource
         .getRepository(Test)
