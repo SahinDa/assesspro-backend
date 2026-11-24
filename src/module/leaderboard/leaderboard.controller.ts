@@ -14,7 +14,7 @@ import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { RoleGuard } from 'src/guards/role.guard';
 import { Roles } from 'src/decorators/role.decorator';
 import { UserRole } from 'src/config/enum';
-import { LeaderboardFilterDto,GetAssessmentOptionsQueryDto } from './dto/leaderboard.dto';
+import { LeaderboardFilterDto,GetAssessmentOptionsQueryDto, GetLeaderboardSearchDto } from './dto/leaderboard.dto';
 
 @Controller('leaderboard')
 @UseGuards(RoleGuard)
@@ -41,6 +41,16 @@ export class LeaderboardController {
   ) {
     return await this.leaderboardservice.getLeaderboardOptions(organization, filter);
   }
+
+@Get('search')
+@HttpCode(HttpStatus.OK)
+@Roles(UserRole.STUDENT, UserRole.ORGANIZATION, UserRole.ADMIN)
+async searchLeaderboard(
+  @Organization() organization: IOrganization,
+  @Query() filter: GetLeaderboardSearchDto,
+) {
+  return await this.leaderboardservice.searchLeaderboard(organization, filter);
+}
   
   
   @Get('/set/:setId')
