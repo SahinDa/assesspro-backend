@@ -124,6 +124,7 @@ export class LeaderboardService {
     try{
       let orgId: string | null = null;
       let isTestset :boolean = filter?.isTestset ?? false;
+      let testId : string = filter?.test_id ;
       
         if (organization.role === UserRole.ORGANIZATION) {
         orgId = organization?.org_id ?? null;
@@ -149,8 +150,10 @@ export class LeaderboardService {
       if (!orgId) {
         throw new NotFoundException('Organization id is required');
       }
-
-      return  await this.leaderboardrepository.getLeaderboardOptions(orgId,isTestset);
+       if(isTestset && !testId){
+          throw new NotFoundException('Test id is required');
+       }
+      return  await this.leaderboardrepository.getLeaderboardOptions(orgId,testId,isTestset);
       
     }catch(err){
       console.log(`Failed to retrieve Leaderboard options:: ${err.message}`);
