@@ -153,7 +153,7 @@ export class LeaderboardService {
        if(isTestset && !testId){
           throw new NotFoundException('Test id is required');
        }
-      return  await this.leaderboardrepository.getLeaderboardOptions(orgId,testId,isTestset);
+      return  await this.leaderboardrepository.getLeaderboardOptions(orgId,isTestset,testId);
       
     }catch(err){
       console.log(`Failed to retrieve Leaderboard options:: ${err.message}`);
