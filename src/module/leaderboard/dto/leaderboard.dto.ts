@@ -1,5 +1,5 @@
 import { Type, Transform } from 'class-transformer';
-import { IsInt, IsOptional, IsUUID, Min, IsBoolean, IsString } from 'class-validator';
+import { IsInt, IsOptional, IsUUID, Min, IsBoolean, IsString, IsNotEmpty } from 'class-validator';
 
 export class LeaderboardFilterDto {
   @IsOptional()
