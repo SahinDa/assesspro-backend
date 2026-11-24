@@ -4,7 +4,7 @@ import { TestAttempt } from '../attempts/entities/testattempt.entity';
 import { TestSet } from '../tests/entities/testset.entity';
 import { OrganizationStatus, TestSetStatus, TestStatus } from 'src/config/enum';
 import { Test } from '../tests/entities/test.entity';
-import { LeaderboardFilterDto } from './dto/leaderboard-filter.dto';
+import { LeaderboardFilterDto } from './dto/leaderboard.dto';
 import { UnifiedLeaderboardRow } from './dto/leaderboard-response.dto';
 
 @Injectable()
@@ -84,6 +84,31 @@ export class LeaderboardRepository {
     };
 
   }
+
+  async getLeaderboardOptions(orgId:string ,isTestset:boolean){
+
+     if(isTestset){
+       return await this.datasource
+        .getRepository(TestSet)
+        .createQueryBuilder('ts')
+        .where('ts.owner_id = :orgId', { orgId })
+        .select([
+         'ts.set_id AS testset_id',
+         'ts.name As testset_name',
+          ])
+        .getRawMany()
+     }
+     return await this.datasource
+        .getRepository(Test)
+        .createQueryBuilder('t')
+        .where('t.owner_id = :orgId', { orgId })
+        .select([
+        't.test_id AS test_id',
+        't.name AS test_name',
+          ])
+       .getRawMany()
+  }
+    
 
   // async getLeaderboardByTestSet(
   //   setId: string,
