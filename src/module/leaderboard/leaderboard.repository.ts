@@ -85,13 +85,14 @@ export class LeaderboardRepository {
 
   }
 
-  async getLeaderboardOptions(orgId:string ,isTestset:boolean){
+  async getLeaderboardOptions(orgId:string ,testId:string ,isTestset:boolean){
 
      if(isTestset){
        return await this.datasource
         .getRepository(TestSet)
         .createQueryBuilder('ts')
         .where('ts.owner_id = :orgId', { orgId })
+        .andWhere('ts.test_id =:testId',{testId}) 
         .select([
          'ts.set_id AS testset_id',
          'ts.name As testset_name',
