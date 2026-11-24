@@ -1,11 +1,11 @@
-import { ForbiddenException, Injectable ,NotFoundException,  } from '@nestjs/common';
+import { ForbiddenException, Injectable ,NotFoundException,InternalServerErrorException,HttpException  } from '@nestjs/common';
 import { LeaderboardRepository } from './leaderboard.repository';
 import {
   LeaderboardRow,
   UnifiedLeaderboardRow,
   LeaderboardResponse,
 } from './dto/leaderboard-response.dto';
-import { LeaderboardFilterDto } from './dto/leaderboard-filter.dto';
+import { LeaderboardFilterDto, GetAssessmentOptionsQueryDto } from './dto/leaderboard.dto';
 import { IOrganization } from 'src/interfaces/organization.interfaces';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { UserRole } from 'src/config/enum';
@@ -117,8 +117,51 @@ export class LeaderboardService {
     }
   }
 
+  async getLeaderboardOptions(
+    organization: IOrganization,
+    filter: GetAssessmentOptionsQueryDto,
+  ){
+    try{
+      let orgId: string | null = null;
+      let isTestset :boolean = filter?.isTestset ?? false;
+      
+        if (organization.role === UserRole.ORGANIZATION) {
+        orgId = organization?.org_id ?? null;
+      } else if (organization.role === UserRole.STUDENT) {
+        orgId = filter?.orgId ?? null;
+        if (!orgId) {
+          throw new NotFoundException('Organization id is required');
+        }
+          const partOfOrganization =
+          await this.organizationsservice.isValidUserOrganization(
+            organization.user_id,
+            orgId
+          );
+        if (!partOfOrganization) {
+          throw new ForbiddenException(
+            'Access Denied: You are not an active member of this organization.',
+          );
+        }
+      } else if (organization.role === UserRole.ADMIN) {
+        orgId = filter?.orgId ?? null;
+      }
+
+      if (!orgId) {
+        throw new NotFoundException('Organization id is required');
+      }
+
+      return  await this.leaderboardrepository.getLeaderboardOptions(orgId,isTestset);
+      
+    }catch(err){
+      console.log(`Failed to retrieve Leaderboard options:: ${err.message}`);
+     if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new InternalServerErrorException('Failed to retrieve leaderboard options');
+    }
+  }
   // async getLeaderboardByTestSet(
-  //   organizaiton: IOrganization,
+  //   organizaiton: IOrganization,)
   //   setId: string,
   //   limit: number,
   //   offset: number,
