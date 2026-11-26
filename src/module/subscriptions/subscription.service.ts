@@ -160,10 +160,9 @@ export class SubscriptionService {
           );
         }
       }
-      return "working";
-      // return await this.subscriptionrepository.getAllOrganizationPlan(
-      //   orgId,
-      // );
+      return await this.subscriptionrepository.getAllOrganizationPlan(
+        orgId,
+      );
     } catch (err) {
       throw err;
     }
