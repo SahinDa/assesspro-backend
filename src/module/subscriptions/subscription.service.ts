@@ -160,7 +160,6 @@ export class SubscriptionService {
           );
         }
       }
-      return "working";
       return await this.subscriptionrepository.getAllOrganizationPlan(
         orgId,
       );
