@@ -41,6 +41,7 @@ export class SubscriptionRepository {
       return await this.datasource
         .getRepository(PlatformPlan)
         .createQueryBuilder('pp')
+        .where('pp.is_active is true')
         .orderBy('pp.created_at', 'DESC')
         .getMany();
     } catch (err) {
@@ -110,6 +111,7 @@ export class SubscriptionRepository {
         .getRepository(OrganizationPlan)
         .createQueryBuilder('op')
         .where('op.organization_id = :orgId', { orgId })
+        .andWhere('op.is_active is true')
         .orderBy('op.created_at', 'DESC')
         .getMany();
     } catch (err) {
@@ -123,6 +125,7 @@ export class SubscriptionRepository {
         .getRepository(OrganizationPlan)
         .createQueryBuilder('op')
         .where('op.plan_id = :planId', { planId })
+         .andWhere('op.is_active is true')
         .andWhere('op.organization_id = :orgId', { orgId })
         .getOne();
     } catch (err) {
@@ -132,11 +135,12 @@ export class SubscriptionRepository {
 
   async updateOrganizationPlan(
     planId: string,
+    orgId:string,
     input: UpdateOrganizationPlanDto,
   ) {
     try {
       const planRepository = this.datasource.getRepository(OrganizationPlan);
-      const plan = await planRepository.findOne({ where: { plan_id: planId } });
+      const plan = await planRepository.findOne({ where: { plan_id: planId,organization_id:orgId, is_active : true } });
 
       if (!plan) {
         throw new NotFoundException('Organization plan not found');
