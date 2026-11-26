@@ -139,12 +139,11 @@ export class SubscriptionService {
   }
   async getAllOrganizationPlan(organization: IOrganization,Id?:string) {
     try {
-      return "working";
       const orgId =
         organization.role === UserRole.ORGANIZATION
           ? organization?.org_id
           : Id;
-
+   return "working";
       if (!orgId) {
         throw new NotFoundException('Organization id is required');
       }
@@ -193,8 +192,7 @@ export class SubscriptionService {
           );
         }
       }
-       
-
+      
       const plan = await this.subscriptionrepository.getOrganizationPlanById(
         orgId,
         planId,
