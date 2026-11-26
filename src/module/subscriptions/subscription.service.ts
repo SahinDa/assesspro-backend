@@ -137,33 +137,66 @@ export class SubscriptionService {
       throw err;
     }
   }
-  async getAllOrganizationPlan(organization: IOrganization) {
+  async getAllOrganizationPlan(organization: IOrganization,Id?:string) {
     try {
-      if (
-        organization.role !== UserRole.ORGANIZATION &&
-        organization.role !== UserRole.STUDENT
-      ) {
-        throw new ForbiddenException('Access denied');
+      let orgId: string | null = Id;
+      if (organization.role === UserRole.ORGANIZATION) {
+        orgId = organization?.org_id ?? null;
+      } else if (organization.role === UserRole.STUDENT) {
+        orgId = Id ?? null;
+        if (!orgId) {
+          throw new NotFoundException('Organization id is required');
+        }
+          const partOfOrganization =
+          await this.organizationsservice.isValidUserOrganization(
+            organization.user_id,
+            orgId
+          );
+        if (!partOfOrganization) {
+          throw new ForbiddenException(
+            'Access Denied: You are not an active member of this organization.',
+          );
+        }
       }
+       if (!orgId) {
+          throw new NotFoundException('Organization id is required');
+        }
+      
       return await this.subscriptionrepository.getAllOrganizationPlan(
-        organization.org_id,
+        orgId,
       );
     } catch (err) {
       throw err;
     }
   }
 
-  async getOrganizationPlanById(organization: IOrganization, planId: string) {
+  async getOrganizationPlanById(organization: IOrganization, planId: string,Id?:string) {
     try {
-      if (
-        organization.role !== UserRole.ORGANIZATION &&
-        organization.role !== UserRole.STUDENT
-      ) {
-        throw new ForbiddenException('Access denied');
+       let orgId: string | null = Id;
+      if (organization.role === UserRole.ORGANIZATION) {
+        orgId = organization?.org_id ?? null;
+      } else if (organization.role === UserRole.STUDENT) {
+        orgId = Id ?? null;
+        if (!orgId) {
+          throw new NotFoundException('Organization id is required');
+        }
+          const partOfOrganization =
+          await this.organizationsservice.isValidUserOrganization(
+            organization.user_id,
+            orgId
+          );
+        if (!partOfOrganization) {
+          throw new ForbiddenException(
+            'Access Denied: You are not an active member of this organization.',
+          );
+        }
       }
+       if (!orgId) {
+          throw new NotFoundException('Organization id is required');
+        }
 
       const plan = await this.subscriptionrepository.getOrganizationPlanById(
-        organization.org_id,
+        orgId,
         planId,
       );
 
