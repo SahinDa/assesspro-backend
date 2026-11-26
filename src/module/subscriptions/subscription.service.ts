@@ -148,15 +148,11 @@ export class SubscriptionService {
         throw new NotFoundException('Organization id is required');
       }
       
-      if (organization.role === UserRole.STUDENT) {
-        orgId = Id ?? null;
-        if (!orgId) {
-          throw new NotFoundException('Organization id is required');
-        }
-          const partOfOrganization =
+     if (organization.role === UserRole.STUDENT) {
+        const partOfOrganization =
           await this.organizationsservice.isValidUserOrganization(
             organization.user_id,
-            orgId
+            orgId,
           );
         if (!partOfOrganization) {
           throw new ForbiddenException(
@@ -185,14 +181,10 @@ export class SubscriptionService {
       }
       
       if (organization.role === UserRole.STUDENT) {
-        orgId = Id ?? null;
-        if (!orgId) {
-          throw new NotFoundException('Organization id is required');
-        }
-          const partOfOrganization =
+        const partOfOrganization =
           await this.organizationsservice.isValidUserOrganization(
             organization.user_id,
-            orgId
+            orgId,
           );
         if (!partOfOrganization) {
           throw new ForbiddenException(
