@@ -139,7 +139,7 @@ export class SubscriptionService {
   }
   async getAllOrganizationPlan(organization: IOrganization,Id?:string) {
     try {
-      let orgId: string | null = Id;
+      let orgId: string | null = Id ?? null;
       if (organization.role === UserRole.ORGANIZATION) {
         orgId = organization?.org_id ?? null;
       } else if (organization.role === UserRole.STUDENT) {
@@ -172,7 +172,7 @@ export class SubscriptionService {
 
   async getOrganizationPlanById(organization: IOrganization, planId: string,Id?:string) {
     try {
-       let orgId: string | null = Id;
+       let orgId: string | null = Id ?? null;
       if (organization.role === UserRole.ORGANIZATION) {
         orgId = organization?.org_id ?? null;
       } else if (organization.role === UserRole.STUDENT) {
