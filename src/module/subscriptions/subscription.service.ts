@@ -143,7 +143,7 @@ export class SubscriptionService {
         organization.role === UserRole.ORGANIZATION
           ? organization?.org_id
           : Id;
-   return "working";
+      
       if (!orgId) {
         throw new NotFoundException('Organization id is required');
       }
@@ -160,7 +160,7 @@ export class SubscriptionService {
           );
         }
       }
-      
+      return "working";
       return await this.subscriptionrepository.getAllOrganizationPlan(
         orgId,
       );
