@@ -139,6 +139,7 @@ export class SubscriptionService {
   }
   async getAllOrganizationPlan(organization: IOrganization,Id?:string) {
     try {
+      return "working";
       let orgId: string | null = Id ?? null;
       if (organization.role === UserRole.ORGANIZATION) {
         orgId = organization?.org_id ?? null;
