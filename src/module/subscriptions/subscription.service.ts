@@ -228,6 +228,7 @@ export class SubscriptionService {
 
       return await this.subscriptionrepository.updateOrganizationPlan(
         planId,
+        organization.org_id,
         input,
       );
     } catch (err) {
