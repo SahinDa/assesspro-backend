@@ -152,13 +152,14 @@ export class SubscriptionRepository {
   async removedOrganizationPlan(orgId: string, planId: string) {
     try {
       const result = await this.datasource
-        .getRepository(OrganizationPlan)
-        .createQueryBuilder('op')
-        .update(OrganizationPlan)
-        .set({ is_active: false })
-        .where('op.plan_id = :planId', { planId })
-        .andWhere('op.organization_id = :orgId', { orgId })
-        .execute();
+      .getRepository(OrganizationPlan)
+      .createQueryBuilder()
+      .update(OrganizationPlan)
+      .set({ is_active: false })
+      .where('plan_id = :planId', { planId })
+      .andWhere('organization_id = :orgId', { orgId })
+      .andWhere('is_active = :isActive', { isActive: true })
+      .execute();
 
       if (result.affected === 0) {
         throw new NotFoundException('Organization plan not found');
