@@ -105,7 +105,6 @@ export class SubscriptionController {
     @Organization() organization: IOrganization,
     @Query('orgId') orgId?: string,
   ) {
-    return "working";
     return await this.subscriptionservice.getAllOrganizationPlan(organization,orgId);
   }
 
