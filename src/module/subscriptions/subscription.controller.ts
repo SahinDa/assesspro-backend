@@ -101,8 +101,11 @@ export class SubscriptionController {
 
   @Get('organization/all')
   @Roles(UserRole.ORGANIZATION, UserRole.STUDENT)
-  async getAllOrganizationPlan(@Organization() organization: IOrganization) {
-    return await this.subscriptionservice.getAllOrganizationPlan(organization);
+  async getAllOrganizationPlan(
+    @Organization() organization: IOrganization,
+    @Query('orgId') orgId?: string,
+  ) {
+    return await this.subscriptionservice.getAllOrganizationPlan(organization,orgId);
   }
 
   @Get('organization/:planId')
@@ -110,10 +113,12 @@ export class SubscriptionController {
   async getOrganizationPlan(
     @Organization() organization: IOrganization,
     @Param('planId', ParseUUIDPipe) planId: string,
+    @Query('orgId') orgId?: string,
   ) {
     return await this.subscriptionservice.getOrganizationPlanById(
       organization,
       planId,
+      orgId,
     );
   }
 
