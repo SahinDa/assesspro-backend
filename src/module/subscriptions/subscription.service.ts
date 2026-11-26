@@ -139,11 +139,16 @@ export class SubscriptionService {
   }
   async getAllOrganizationPlan(organization: IOrganization,Id?:string) {
     try {
-      return "working";
-      let orgId: string | null = Id ?? null;
-      if (organization.role === UserRole.ORGANIZATION) {
-        orgId = organization?.org_id ?? null;
-      } else if (organization.role === UserRole.STUDENT) {
+      const orgId =
+        organization.role === UserRole.ORGANIZATION
+          ? organization?.org_id
+          : Id;
+
+      if (!orgId) {
+        throw new NotFoundException('Organization id is required');
+      }
+      
+      if (organization.role === UserRole.STUDENT) {
         orgId = Id ?? null;
         if (!orgId) {
           throw new NotFoundException('Organization id is required');
@@ -159,9 +164,6 @@ export class SubscriptionService {
           );
         }
       }
-       if (!orgId) {
-          throw new NotFoundException('Organization id is required');
-        }
       
       return await this.subscriptionrepository.getAllOrganizationPlan(
         orgId,
@@ -173,10 +175,16 @@ export class SubscriptionService {
 
   async getOrganizationPlanById(organization: IOrganization, planId: string,Id?:string) {
     try {
-       let orgId: string | null = Id ?? null;
-      if (organization.role === UserRole.ORGANIZATION) {
-        orgId = organization?.org_id ?? null;
-      } else if (organization.role === UserRole.STUDENT) {
+         const orgId =
+        organization.role === UserRole.ORGANIZATION
+          ? organization?.org_id
+          : Id;
+
+      if (!orgId) {
+        throw new NotFoundException('Organization id is required');
+      }
+      
+      if (organization.role === UserRole.STUDENT) {
         orgId = Id ?? null;
         if (!orgId) {
           throw new NotFoundException('Organization id is required');
@@ -192,9 +200,7 @@ export class SubscriptionService {
           );
         }
       }
-       if (!orgId) {
-          throw new NotFoundException('Organization id is required');
-        }
+       
 
       const plan = await this.subscriptionrepository.getOrganizationPlanById(
         orgId,
