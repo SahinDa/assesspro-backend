@@ -148,21 +148,22 @@ export class SubscriptionService {
         throw new NotFoundException('Organization id is required');
       }
       
-     // if (organization.role === UserRole.STUDENT) {
-     //    const partOfOrganization =
-     //      await this.organizationsservice.isValidUserOrganization(
-     //        organization.user_id,
-     //        orgId,
-     //      );
-     //    if (!partOfOrganization) {
-     //      throw new ForbiddenException(
-     //        'Access Denied: You are not an active member of this organization.',
-     //      );
-     //    }
-     //  }
-      return await this.subscriptionrepository.getAllOrganizationPlan(
-        orgId,
-      );
+     if (organization.role === UserRole.STUDENT) {
+        const partOfOrganization =
+          await this.organizationsservice.isValidUserOrganization(
+            organization.user_id,
+            orgId,
+          );
+        if (!partOfOrganization) {
+          throw new ForbiddenException(
+            'Access Denied: You are not an active member of this organization.',
+          );
+        }
+      }
+      return "working";
+      // return await this.subscriptionrepository.getAllOrganizationPlan(
+      //   orgId,
+      // );
     } catch (err) {
       throw err;
     }
